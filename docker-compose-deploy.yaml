@@ -1,0 +1,43 @@
+version: '3.4'
+
+services:
+  app:
+    restart: always
+    image: app
+    container_name: app
+    build:
+      context: .
+      dockerfile: Dockerfile_deploy
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./.bin/:/root/
+      - ./configs/:/root/configs/
+      - ./templates/:/root/templates/
+    env_file:
+      - .env
+
+  db:
+    restart: always
+    image: postgres:latest
+    container_name: auth_db
+    env_file:
+      - .env
+    volumes:
+      - ./.data/db:/data/db
+    ports:
+      - '5438:5432'
+  redis:
+    image: redis:latest
+    container_name: app_redis
+    env_file:
+      - .env
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    ports:
+      - '6379:6379'
+
+

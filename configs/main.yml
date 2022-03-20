@@ -1,0 +1,35 @@
+http:
+  port: 8080
+  maxHeaderBytes: 1
+  readTimeout: 10s
+  writeTimeout: 10s
+
+db:
+  username: "postgres"
+  host: "localhost"
+  port: "5438"
+  dbname: "postgres"
+  sslmode: "disable"
+
+
+auth:
+  accessTokenTTL: 2h
+  refreshTokenTTL: 720h #30 days
+
+redis:
+  redis_db: 0
+
+
+
+smtp:
+  host: "smtp.gmail.com"
+  port: 587
+  from: "raimbekidirbai@gmail.com"
+
+email:
+  templates:
+    verification_email: "./templates/verification_email.html"
+    purchase_successful: "./templates/purchase_successful.html"
+  subjects:
+    verification_email: "Спасибо за регистрацию, %s!"
+    purchase_successful: "Покупка прошла успешно!"

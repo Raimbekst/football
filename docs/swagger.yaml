@@ -1,0 +1,1184 @@
+basePath: /api/v1/
+definitions:
+  domain.Building:
+    properties:
+      address:
+        type: string
+      description:
+        type: string
+      end_time:
+        type: string
+      id:
+        type: integer
+      instagram:
+        type: string
+      manager_id:
+        type: integer
+      name:
+        type: string
+      start_time:
+        type: string
+      work_time:
+        type: integer
+    type: object
+  domain.BuildingImage:
+    properties:
+      building_id:
+        type: integer
+      id:
+        type: integer
+      image:
+        type: string
+      manager_id:
+        type: integer
+    type: object
+  domain.GetAllResponses:
+    properties:
+      data: {}
+      page_info:
+        $ref: '#/definitions/domain.PaginationPage'
+    type: object
+  domain.PaginationPage:
+    properties:
+      count:
+        type: integer
+      page:
+        type: integer
+      pages:
+        type: integer
+    type: object
+  domain.Pitch:
+    properties:
+      building_id:
+        type: integer
+      id:
+        type: integer
+      image:
+        type: string
+      manager_id:
+        type: integer
+      price:
+        type: integer
+    type: object
+  domain.ResetPasswordInput:
+    properties:
+      confirm_new_password:
+        type: string
+      new_password:
+        maxLength: 64
+        minLength: 8
+        type: string
+      phone_number:
+        type: string
+      secret_code:
+        type: string
+    required:
+    - confirm_new_password
+    - new_password
+    - phone_number
+    - secret_code
+    type: object
+  domain.ResetPhoneNumberInput:
+    properties:
+      phone_number:
+        type: string
+      secret_code:
+        type: string
+    required:
+    - phone_number
+    - secret_code
+    type: object
+  domain.SetPasswordInput:
+    properties:
+      confirm_new_password:
+        type: string
+      current_password:
+        type: string
+      new_password:
+        maxLength: 64
+        minLength: 8
+        type: string
+    required:
+    - confirm_new_password
+    - current_password
+    - new_password
+    type: object
+  domain.VerifyUserInput:
+    properties:
+      phone:
+        type: string
+      phone_code:
+        type: string
+    required:
+    - phone
+    - phone_code
+    type: object
+  v1.Building:
+    properties:
+      address:
+        type: string
+      description:
+        type: string
+      instagram:
+        type: string
+      name:
+        type: string
+      work_time:
+        enum:
+        - 1
+        - 2
+        type: integer
+    required:
+    - address
+    - description
+    - name
+    - work_time
+    type: object
+  v1.PhoneNumberInput:
+    properties:
+      phone_number:
+        type: string
+    required:
+    - phone_number
+    type: object
+  v1.UpdateBuilding:
+    properties:
+      address:
+        type: string
+      description:
+        type: string
+      instagram:
+        type: string
+      name:
+        type: string
+    type: object
+  v1.UpdateNumberInput:
+    properties:
+      new_phone_number:
+        type: string
+    required:
+    - new_phone_number
+    type: object
+  v1.UserSignUpInput:
+    properties:
+      confirm_password:
+        type: string
+      name:
+        type: string
+      password:
+        maxLength: 64
+        minLength: 8
+        type: string
+      phone_number:
+        type: string
+    required:
+    - confirm_password
+    - password
+    - phone_number
+    type: object
+  v1.WorkTime:
+    properties:
+      end_time:
+        type: string
+      start_time:
+        type: string
+    required:
+    - end_time
+    - start_time
+    type: object
+  v1.codeResponse:
+    properties:
+      secret_code:
+        type: string
+    type: object
+  v1.idResponse:
+    properties:
+      id: {}
+    type: object
+  v1.okResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  v1.response:
+    properties:
+      detail:
+        type: string
+    type: object
+  v1.signInInput:
+    properties:
+      password:
+        type: string
+      phone_number:
+        type: string
+    required:
+    - password
+    - phone_number
+    type: object
+  v1.tokenResponse:
+    properties:
+      access:
+        type: string
+      refresh:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API Server for CarWash Application
+  title: Car Wash Bismillahirrahmanirrahim
+  version: "2.0"
+paths:
+  /auth/manager/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: create member account
+      parameters:
+      - description: manager sign-up
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/v1.UserSignUpInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.codeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - auth
+  /auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: verify email for reset password
+      parameters:
+      - description: enter email
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/v1.PhoneNumberInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.codeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - auth
+  /auth/reset-password-confirm:
+    post:
+      consumes:
+      - application/json
+      description: verify secret code for reset password
+      parameters:
+      - description: reset password
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/domain.ResetPasswordInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.okResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - auth
+  /auth/set-password:
+    post:
+      consumes:
+      - application/json
+      description: users change password
+      parameters:
+      - description: change password
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.SetPasswordInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.okResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - auth
+  /auth/set-phone-number-confirm:
+    post:
+      consumes:
+      - application/json
+      description: update phone number execute
+      parameters:
+      - description: phone number confirm
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/domain.ResetPhoneNumberInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.codeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - auth
+  /auth/set-phone-number-verify:
+    post:
+      consumes:
+      - application/json
+      description: update phone number verify
+      parameters:
+      - description: phone number verify input
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/v1.UpdateNumberInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.codeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - auth
+  /auth/sign-in:
+    post:
+      consumes:
+      - application/json
+      description: user sign in
+      parameters:
+      - description: sign in info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.signInInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.tokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - auth
+  /auth/user/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: create member account
+      parameters:
+      - description: user sign-up
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/v1.UserSignUpInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.codeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - auth
+  /auth/verify:
+    post:
+      consumes:
+      - application/json
+      description: verify user phone number
+      parameters:
+      - description: user verify
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/domain.VerifyUserInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.okResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - auth
+  /building:
+    get:
+      consumes:
+      - application/json
+      description: get all buildings
+      operationId: get-all-buildings
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.GetAllResponses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - building
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: building create input
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/v1.Building'
+      - description: work time
+        in: body
+        name: work_time
+        schema:
+          $ref: '#/definitions/v1.WorkTime'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.idResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - building
+  /building/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete building
+      parameters:
+      - description: building id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.okResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - building
+    get:
+      consumes:
+      - application/json
+      description: get building by id
+      operationId: get-building-by-id
+      parameters:
+      - description: building id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Building'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - building
+    put:
+      consumes:
+      - application/json
+      description: update  building
+      parameters:
+      - description: building id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: building input
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/v1.UpdateBuilding'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.okResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - building
+  /building/image:
+    get:
+      consumes:
+      - application/json
+      description: get all buildings
+      operationId: get-all-building
+      parameters:
+      - in: query
+        name: building_id
+        type: integer
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.GetAllResponses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - building
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: building id
+        in: formData
+        name: building_id
+        required: true
+        type: integer
+      - description: image of building
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.idResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - building
+  /building/image/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete building
+      parameters:
+      - description: building id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.okResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - building
+    get:
+      consumes:
+      - application/json
+      description: get building by id
+      operationId: get-building-image-by-id
+      parameters:
+      - description: building id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.BuildingImage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - building
+    put:
+      consumes:
+      - multipart/form-data
+      description: update  building
+      parameters:
+      - description: building id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: building id
+        in: formData
+        name: building_id
+        type: integer
+      - description: image of building
+        in: formData
+        name: image
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.okResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - building
+  /pitch:
+    get:
+      consumes:
+      - application/json
+      description: get all pitch
+      operationId: get-all-pitch
+      parameters:
+      - in: query
+        name: building_id
+        type: integer
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.GetAllResponses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - pitch
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: building id
+        in: formData
+        name: building_id
+        required: true
+        type: integer
+      - description: price for pitch
+        in: formData
+        name: price
+        required: true
+        type: integer
+      - description: pitch image
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.idResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - pitch
+  /pitch/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete pitch
+      parameters:
+      - description: pitch id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.okResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - pitch
+    get:
+      consumes:
+      - application/json
+      description: get pitch by id
+      operationId: get-pitch-by-id
+      parameters:
+      - description: pitch id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Pitch'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - pitch
+    put:
+      consumes:
+      - multipart/form-data
+      description: update  pitch
+      parameters:
+      - description: pitch id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: building id
+        in: formData
+        name: building_id
+        type: integer
+      - description: price for pitch
+        in: formData
+        name: price
+        type: integer
+      - description: pitch image
+        in: formData
+        name: image
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.okResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - pitch
+securityDefinitions:
+  User_Auth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
