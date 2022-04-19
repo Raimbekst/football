@@ -22,9 +22,9 @@ type SetPasswordInput struct {
 
 type ResetPasswordInput struct {
 	PhoneNumber        string `json:"phone_number"           validate:"required"`
-	SecretCode         string `json:"secret_code"     validate:"required"`
-	NewPassword        string `json:"new_password"     validate:"required,min=8,max=64" `
-	ConfirmNewPassword string `json:"confirm_new_password" validate:"required"`
+	SecretCode         string `json:"secret_code"            validate:"required"`
+	NewPassword        string `json:"new_password"           validate:"required,min=8,max=64" `
+	ConfirmNewPassword string `json:"confirm_new_password"`
 }
 type ResetPhoneNumberInput struct {
 	PhoneNumber string `json:"phone_number"           validate:"required"`

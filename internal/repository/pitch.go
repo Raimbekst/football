@@ -31,12 +31,12 @@ func (p *PitchRepos) Create(ctx *fiber.Ctx, pitch domain.Pitch) (int, error) {
 		`INSERT 
 					INTO 
 					%s 
-						(building_id,price,pitch_image) 
+						(building_id,price,pitch_image,pitch_type,pitch_extra) 
 					SELECT 
-						b.id, $1, $2 
-					FROM %s b INNER JOIN %s u on b.manager_id = u.id WHERE b.id = $3 AND u.id = $4 RETURNING id`, pitchTable, buildingTable, userTable)
+						b.id, $1, $2 ,$3, $4 
+					FROM %s b INNER JOIN %s u on b.manager_id = u.id WHERE b.id = $5 AND u.id = $6 RETURNING id`, pitchTable, buildingTable, userTable)
 
-	err := p.db.QueryRowx(query, pitch.Price, pitch.Image, pitch.BuildingId, pitch.ManagerId).Scan(&id)
+	err := p.db.QueryRowx(query, pitch.Price, pitch.Image, pitch.PitchType, pitch.PitchExtra, pitch.BuildingId, pitch.ManagerId).Scan(&id)
 
 	if err != nil {
 		return 0, fmt.Errorf("repository.Create: %w", err)
@@ -141,6 +141,19 @@ func (p *PitchRepos) Update(ctx *fiber.Ctx, id int, inp domain.Pitch) ([]string,
 		setValues = append(setValues, fmt.Sprintf("pitch_image=:pitch_image"))
 		images = append(images, "pitch_image")
 	}
+
+	if inp.PitchType != 0 {
+		setValues = append(setValues, fmt.Sprintf("pitch_type=:pitch_type"))
+	}
+
+	if inp.Price != 0 {
+		setValues = append(setValues, fmt.Sprintf("price=:price"))
+	}
+
+	if inp.PitchExtra != 0 {
+		setValues = append(setValues, fmt.Sprintf("pitch_extra=:pitch_extra"))
+	}
+
 	setImages := strings.Join(images, ", ")
 
 	var input domain.Pitch

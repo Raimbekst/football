@@ -574,6 +574,35 @@ var doc = `{
                         "type": "integer",
                         "name": "page",
                         "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "end_cost",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            1,
+                            2
+                        ],
+                        "type": "integer",
+                        "name": "pitch_extra",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            1,
+                            2,
+                            3
+                        ],
+                        "type": "integer",
+                        "name": "pitch_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "start_cost",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -632,14 +661,6 @@ var doc = `{
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/v1.Building"
-                        }
-                    },
-                    {
-                        "description": "work time",
-                        "name": "work_time",
-                        "in": "body",
-                        "schema": {
-                            "$ref": "#/definitions/v1.WorkTime"
                         }
                     }
                 ],
@@ -1170,6 +1191,372 @@ var doc = `{
                 }
             }
         },
+        "/favourite": {
+            "get": {
+                "security": [
+                    {
+                        "User_Auth": []
+                    }
+                ],
+                "description": "get all favourites",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "favourite"
+                ],
+                "operationId": "get-all-favourites",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.GetAllResponses"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "User_Auth": []
+                    }
+                ],
+                "description": "create favourite",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "favourite"
+                ],
+                "parameters": [
+                    {
+                        "description": "favourite create input",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.Favourite"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/v1.idResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/favourite/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "User_Auth": []
+                    }
+                ],
+                "description": "get favourite by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "favourite"
+                ],
+                "operationId": "get-favourite-by-id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "favourite id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Favourite"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "User_Auth": []
+                    }
+                ],
+                "description": "delete favourite",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "favourite"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "favourite id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.okResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/order": {
+            "get": {
+                "description": "gets all orders",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "operationId": "get-all-orders",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "name": "order_date",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.GetAllResponses"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "User_Auth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "parameters": [
+                    {
+                        "description": "order create input",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.order"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/v1.idResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
         "/pitch": {
             "get": {
                 "description": "get all pitch",
@@ -1269,6 +1656,28 @@ var doc = `{
                         "name": "image",
                         "in": "formData",
                         "required": true
+                    },
+                    {
+                        "enum": [
+                            1,
+                            2,
+                            3
+                        ],
+                        "type": "integer",
+                        "description": "pitch type",
+                        "name": "pitch_type",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            1,
+                            2
+                        ],
+                        "type": "integer",
+                        "description": "pitch extra",
+                        "name": "pitch_extra",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -1401,6 +1810,27 @@ var doc = `{
                         "description": "pitch image",
                         "name": "image",
                         "in": "formData"
+                    },
+                    {
+                        "enum": [
+                            1,
+                            2,
+                            3
+                        ],
+                        "type": "integer",
+                        "description": "pitch type",
+                        "name": "pitch_type",
+                        "in": "formData"
+                    },
+                    {
+                        "enum": [
+                            1,
+                            2
+                        ],
+                        "type": "integer",
+                        "description": "pitch extra",
+                        "name": "pitch_extra",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -1515,11 +1945,20 @@ var doc = `{
                 "instagram": {
                     "type": "string"
                 },
+                "latitude": {
+                    "type": "string"
+                },
+                "longtitude": {
+                    "type": "string"
+                },
                 "manager_id": {
                     "type": "integer"
                 },
                 "name": {
                     "type": "string"
+                },
+                "price": {
+                    "type": "integer"
                 },
                 "start_time": {
                     "type": "string"
@@ -1542,6 +1981,47 @@ var doc = `{
                     "type": "string"
                 },
                 "manager_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "domain.Favourite": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "end_time": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "instagram": {
+                    "type": "string"
+                },
+                "latitude": {
+                    "type": "string"
+                },
+                "longtitude": {
+                    "type": "string"
+                },
+                "manager_id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "start_time": {
+                    "type": "string"
+                },
+                "work_time": {
                     "type": "integer"
                 }
             }
@@ -1584,6 +2064,12 @@ var doc = `{
                 "manager_id": {
                     "type": "integer"
                 },
+                "pitch_extra": {
+                    "type": "integer"
+                },
+                "pitch_type": {
+                    "type": "integer"
+                },
                 "price": {
                     "type": "integer"
                 }
@@ -1592,7 +2078,6 @@ var doc = `{
         "domain.ResetPasswordInput": {
             "type": "object",
             "required": [
-                "confirm_new_password",
                 "new_password",
                 "phone_number",
                 "secret_code"
@@ -1670,7 +2155,11 @@ var doc = `{
             "required": [
                 "address",
                 "description",
+                "end_time",
+                "latitude",
+                "longtitude",
                 "name",
+                "start_time",
                 "work_time"
             ],
             "properties": {
@@ -1680,10 +2169,22 @@ var doc = `{
                 "description": {
                     "type": "string"
                 },
+                "end_time": {
+                    "type": "string"
+                },
                 "instagram": {
                     "type": "string"
                 },
+                "latitude": {
+                    "type": "string"
+                },
+                "longtitude": {
+                    "type": "string"
+                },
                 "name": {
+                    "type": "string"
+                },
+                "start_time": {
                     "type": "string"
                 },
                 "work_time": {
@@ -1692,6 +2193,17 @@ var doc = `{
                         1,
                         2
                     ]
+                }
+            }
+        },
+        "v1.Favourite": {
+            "type": "object",
+            "required": [
+                "building_id"
+            ],
+            "properties": {
+                "building_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -1715,11 +2227,30 @@ var doc = `{
                 "description": {
                     "type": "string"
                 },
+                "end_time": {
+                    "type": "string"
+                },
                 "instagram": {
+                    "type": "string"
+                },
+                "latitude": {
+                    "type": "string"
+                },
+                "longtitude": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "start_time": {
+                    "type": "string"
+                },
+                "work_time": {
+                    "type": "integer",
+                    "enum": [
+                        1,
+                        2
+                    ]
                 }
             }
         },
@@ -1758,21 +2289,6 @@ var doc = `{
                 }
             }
         },
-        "v1.WorkTime": {
-            "type": "object",
-            "required": [
-                "end_time",
-                "start_time"
-            ],
-            "properties": {
-                "end_time": {
-                    "type": "string"
-                },
-                "start_time": {
-                    "type": "string"
-                }
-            }
-        },
         "v1.codeResponse": {
             "type": "object",
             "properties": {
@@ -1791,6 +2307,23 @@ var doc = `{
             "type": "object",
             "properties": {
                 "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.order": {
+            "type": "object",
+            "properties": {
+                "end_time": {
+                    "type": "string"
+                },
+                "order_date": {
+                    "type": "number"
+                },
+                "pitch_id": {
+                    "type": "integer"
+                },
+                "start_time": {
                     "type": "string"
                 }
             }

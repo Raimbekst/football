@@ -27,9 +27,9 @@ func (b *BuildingRepos) Create(ctx *fiber.Ctx, building domain.Building) (int, e
 
 	defer cancel()
 
-	query := fmt.Sprintf("INSERT INTO %s(building_name, address, instagram, manager_id) VALUES($1,$2,$3,$4) RETURNING id", buildingTable)
+	query := fmt.Sprintf("INSERT INTO %s(building_name, address, instagram, manager_id,description,work_time,start_time,end_time,longtitude,latitude) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id", buildingTable)
 
-	err := b.db.QueryRowx(query, building.Name, building.Address, building.Instagram, building.ManagerId).Scan(&id)
+	err := b.db.QueryRowx(query, building.Name, building.Address, building.Instagram, building.ManagerId, building.Description, building.WorkTime, building.StartTime, building.EndTime, building.Longtitude, building.Latitude).Scan(&id)
 
 	if err != nil {
 		return 0, fmt.Errorf("repository.Create: %w", err)
@@ -37,10 +37,16 @@ func (b *BuildingRepos) Create(ctx *fiber.Ctx, building domain.Building) (int, e
 	return id, nil
 }
 
-func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info domain.UserInfo) (*domain.GetAllResponses, error) {
+func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info domain.UserInfo, building domain.FilterForBuilding) (*domain.GetAllResponses, error) {
 
 	var (
-		setValues string
+		countValues      string
+		setValues        string
+		whereClause      string = " WHERE "
+		havingClause     string = " Having "
+		whereValuesList  []string
+		havingValuesList []string
+		count            int
 	)
 
 	_, cancel := context.WithTimeout(ctx.Context(), 4*time.Second)
@@ -50,21 +56,71 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 	switch info.Type {
 
 	case "manager":
-		setValues = fmt.Sprintf("WHERE manager_id = %d", info.Id)
+		whereValuesList = append(whereValuesList, fmt.Sprintf("manager_id = %d", info.Id))
 	}
 
-	count, err := countPage(b.db, buildingTable, setValues)
-	if err != nil {
-		return nil, fmt.Errorf("repository.GetAll: %w", err)
+	if building.PitchType != 0 {
+		whereValuesList = append(whereValuesList, fmt.Sprintf("pitch_type = %d", building.PitchType))
 	}
+
+	if building.PitchExtra != 0 {
+		whereValuesList = append(whereValuesList, fmt.Sprintf("pitch_extra = %d", building.PitchExtra))
+	}
+
+	if building.StartCost != nil {
+		havingValuesList = append(havingValuesList, fmt.Sprintf("min(price) >= %d", *building.StartCost))
+	}
+
+	if building.EndCost != nil {
+		havingValuesList = append(havingValuesList, fmt.Sprintf("min(price) <= %d", *building.EndCost))
+	}
+
+	whereValuesJoin := strings.Join(whereValuesList, " AND ")
+
+	if whereValuesList != nil {
+		countValues = countValues + whereClause + whereValuesJoin
+		setValues = setValues + whereClause + whereValuesJoin
+	}
+
+	setValues = setValues + fmt.Sprintf(" GROUP BY b.id, building_name, address, instagram, manager_id, description, work_time, start_time, end_time,longtitude,latitude")
+
+	havingValuesJoin := strings.Join(havingValuesList, " AND ")
+
+	if havingValuesList != nil {
+		countValues = countValues + havingClause + havingValuesJoin
+		setValues = setValues + havingClause + havingValuesJoin
+	}
+
+	queryCount := fmt.Sprintf(
+		`SELECT 
+					count(distinct b.id) 
+				FROM
+					%s b
+				LEFT OUTER  JOIN 
+					%s p
+				ON  
+					b.id = p.building_id
+				%s`, buildingTable, pitchTable, countValues)
+
+	_ = b.db.QueryRowx(queryCount).Scan(&count)
 
 	offset, pagesCount := calculatePagination(&page, count)
 
-	inp := make([]*domain.Building, 0, page.Limit)
+	inp := make([]*domain.Building, 0)
 
-	query := fmt.Sprintf("SELECT * FROM %s %s ORDER BY id ASC LIMIT $1 OFFSET $2", buildingTable, setValues)
+	query := fmt.Sprintf(
+		`SELECT 
+					b.*,
+					COALESCE(min(price),null,0) as min_price
+				FROM 
+					%s b
+				LEFT OUTER JOIN 
+					%s p
+				ON 
+					b.id = p.building_id
+				%s ORDER BY b.id ASC LIMIT $1 OFFSET $2`, buildingTable, pitchTable, setValues)
 
-	err = b.db.Select(&inp, query, page.Limit, offset)
+	err := b.db.Select(&inp, query, page.Limit, offset)
 
 	if err != nil {
 		return nil, fmt.Errorf("repository.GetAll: %w", err)
@@ -93,7 +149,18 @@ func (b *BuildingRepos) GetById(ctx *fiber.Ctx, id int) (*domain.Building, error
 
 	defer cancel()
 
-	query := fmt.Sprintf("SELECT * FROM %s WHERE id = $1", buildingTable)
+	query := fmt.Sprintf(`
+				SELECT 
+					b.*,
+					COALESCE(min(price),null,0) as min_price
+				FROM 
+					%s b
+				LEFT OUTER JOIN 
+					%s p
+				ON 
+					b.id = p.building_id
+				WHERE b.id = $1
+					group by b.id, building_name, address, instagram, manager_id, description, work_time, start_time, end_time, longtitude, latitude;`, buildingTable, pitchTable)
 
 	err := b.db.Get(&inp, query, id)
 

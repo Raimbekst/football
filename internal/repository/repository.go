@@ -13,8 +13,14 @@ const (
 	buildingTable      = "buildings"
 	buildingImageTable = "images"
 	pitchTable         = "pitches"
+	favouriteTable     = "favourites"
+	orderTable         = "orders"
 )
 
+type FavouriteInput struct {
+	UserId     int
+	BuildingId int
+}
 type UserAuth interface {
 	VerifyExistenceUser(phone string, activated bool) (*domain.User, error)
 
@@ -36,7 +42,7 @@ type UserAuth interface {
 
 type Building interface {
 	Create(c *fiber.Ctx, building domain.Building) (int, error)
-	GetAll(c *fiber.Ctx, page domain.Pagination, info domain.UserInfo) (*domain.GetAllResponses, error)
+	GetAll(c *fiber.Ctx, page domain.Pagination, info domain.UserInfo, building domain.FilterForBuilding) (*domain.GetAllResponses, error)
 	GetById(c *fiber.Ctx, id int) (*domain.Building, error)
 	Update(c *fiber.Ctx, id int, inp domain.Building) error
 	Delete(c *fiber.Ctx, id int) error
@@ -58,11 +64,25 @@ type Pitch interface {
 	Delete(ctx *fiber.Ctx, id int) ([]string, error)
 }
 
+type Favourite interface {
+	Create(ctx *fiber.Ctx, input FavouriteInput) (int, error)
+	GetAll(ctx *fiber.Ctx, page domain.Pagination, id int) (*domain.GetAllResponses, error)
+	GetById(ctx *fiber.Ctx, id, userId int) (*domain.Favourite, error)
+	Delete(ctx *fiber.Ctx, id, userId int) error
+}
+
+type Order interface {
+	Create(ctx *fiber.Ctx, order domain.Order) (int, error)
+	GetAll(ctx *fiber.Ctx, page domain.Pagination, info domain.UserInfo, date float64) (*domain.GetAllResponses, error)
+}
+
 type Repository struct {
 	UserAuth
 	Building
 	BuildingImage
 	Pitch
+	Favourite
+	Order
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
@@ -71,6 +91,8 @@ func NewRepository(db *sqlx.DB) *Repository {
 		Building:      NewBuildingRepos(db),
 		BuildingImage: NewBuildingImageRepos(db),
 		Pitch:         NewPitchRepos(db),
+		Favourite:     NewFavouriteRepos(db),
+		Order:         NewOrderRepos(db),
 	}
 }
 

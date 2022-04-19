@@ -8,6 +8,11 @@ import (
 	"strconv"
 )
 
+const (
+	reserved = 1
+	finished = 2
+)
+
 type Handler struct {
 	services     *service.Service
 	tokenManager auth.TokenManager
@@ -22,8 +27,10 @@ func (h *Handler) Init(api fiber.Router) {
 	v1 := api.Group("/v1")
 	{
 		h.initUserRoutes(v1)
+		h.initOrderRoutes(v1)
 		h.initBuildingRoutes(v1)
 		h.initPitchRoutes(v1)
+		h.initFavouriteRoutes(v1)
 	}
 }
 

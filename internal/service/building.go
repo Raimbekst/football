@@ -17,8 +17,8 @@ func NewBuildingService(repos repository.Building) *BuildingService {
 func (b *BuildingService) Create(ctx *fiber.Ctx, building domain.Building) (int, error) {
 	return b.repos.Create(ctx, building)
 }
-func (b *BuildingService) GetAll(ctx *fiber.Ctx, page domain.Pagination, info domain.UserInfo) (*domain.GetAllResponses, error) {
-	return b.repos.GetAll(ctx, page, info)
+func (b *BuildingService) GetAll(ctx *fiber.Ctx, page domain.Pagination, info domain.UserInfo, building domain.FilterForBuilding) (*domain.GetAllResponses, error) {
+	return b.repos.GetAll(ctx, page, info, building)
 }
 
 func (b *BuildingService) GetById(ctx *fiber.Ctx, id int) (*domain.Building, error) {

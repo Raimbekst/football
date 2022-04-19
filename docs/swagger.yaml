@@ -12,10 +12,16 @@ definitions:
         type: integer
       instagram:
         type: string
+      latitude:
+        type: string
+      longtitude:
+        type: string
       manager_id:
         type: integer
       name:
         type: string
+      price:
+        type: integer
       start_time:
         type: string
       work_time:
@@ -30,6 +36,33 @@ definitions:
       image:
         type: string
       manager_id:
+        type: integer
+    type: object
+  domain.Favourite:
+    properties:
+      address:
+        type: string
+      description:
+        type: string
+      end_time:
+        type: string
+      id:
+        type: integer
+      instagram:
+        type: string
+      latitude:
+        type: string
+      longtitude:
+        type: string
+      manager_id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: integer
+      start_time:
+        type: string
+      work_time:
         type: integer
     type: object
   domain.GetAllResponses:
@@ -57,6 +90,10 @@ definitions:
         type: string
       manager_id:
         type: integer
+      pitch_extra:
+        type: integer
+      pitch_type:
+        type: integer
       price:
         type: integer
     type: object
@@ -73,7 +110,6 @@ definitions:
       secret_code:
         type: string
     required:
-    - confirm_new_password
     - new_password
     - phone_number
     - secret_code
@@ -119,9 +155,17 @@ definitions:
         type: string
       description:
         type: string
+      end_time:
+        type: string
       instagram:
         type: string
+      latitude:
+        type: string
+      longtitude:
+        type: string
       name:
+        type: string
+      start_time:
         type: string
       work_time:
         enum:
@@ -131,8 +175,19 @@ definitions:
     required:
     - address
     - description
+    - end_time
+    - latitude
+    - longtitude
     - name
+    - start_time
     - work_time
+    type: object
+  v1.Favourite:
+    properties:
+      building_id:
+        type: integer
+    required:
+    - building_id
     type: object
   v1.PhoneNumberInput:
     properties:
@@ -147,10 +202,23 @@ definitions:
         type: string
       description:
         type: string
+      end_time:
+        type: string
       instagram:
+        type: string
+      latitude:
+        type: string
+      longtitude:
         type: string
       name:
         type: string
+      start_time:
+        type: string
+      work_time:
+        enum:
+        - 1
+        - 2
+        type: integer
     type: object
   v1.UpdateNumberInput:
     properties:
@@ -176,16 +244,6 @@ definitions:
     - password
     - phone_number
     type: object
-  v1.WorkTime:
-    properties:
-      end_time:
-        type: string
-      start_time:
-        type: string
-    required:
-    - end_time
-    - start_time
-    type: object
   v1.codeResponse:
     properties:
       secret_code:
@@ -198,6 +256,17 @@ definitions:
   v1.okResponse:
     properties:
       message:
+        type: string
+    type: object
+  v1.order:
+    properties:
+      end_time:
+        type: string
+      order_date:
+        type: number
+      pitch_id:
+        type: integer
+      start_time:
         type: string
     type: object
   v1.response:
@@ -581,6 +650,25 @@ paths:
       - in: query
         name: page
         type: integer
+      - in: query
+        name: end_cost
+        type: integer
+      - enum:
+        - 1
+        - 2
+        in: query
+        name: pitch_extra
+        type: integer
+      - enum:
+        - 1
+        - 2
+        - 3
+        in: query
+        name: pitch_type
+        type: integer
+      - in: query
+        name: start_cost
+        type: integer
       produces:
       - application/json
       responses:
@@ -616,11 +704,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/v1.Building'
-      - description: work time
-        in: body
-        name: work_time
-        schema:
-          $ref: '#/definitions/v1.WorkTime'
       produces:
       - application/json
       responses:
@@ -966,6 +1049,238 @@ paths:
       - User_Auth: []
       tags:
       - building
+  /favourite:
+    get:
+      consumes:
+      - application/json
+      description: get all favourites
+      operationId: get-all-favourites
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.GetAllResponses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - favourite
+    post:
+      consumes:
+      - application/json
+      description: create favourite
+      parameters:
+      - description: favourite create input
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/v1.Favourite'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.idResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - favourite
+  /favourite/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete favourite
+      parameters:
+      - description: favourite id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.okResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - favourite
+    get:
+      consumes:
+      - application/json
+      description: get favourite by id
+      operationId: get-favourite-by-id
+      parameters:
+      - description: favourite id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Favourite'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - favourite
+  /order:
+    get:
+      consumes:
+      - application/json
+      description: gets all orders
+      operationId: get-all-orders
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: order_date
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.GetAllResponses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - orders
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: order create input
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/v1.order'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.idResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - orders
   /pitch:
     get:
       consumes:
@@ -1026,6 +1341,22 @@ paths:
         name: image
         required: true
         type: file
+      - description: pitch type
+        enum:
+        - 1
+        - 2
+        - 3
+        in: formData
+        name: pitch_type
+        required: true
+        type: integer
+      - description: pitch extra
+        enum:
+        - 1
+        - 2
+        in: formData
+        name: pitch_extra
+        type: integer
       produces:
       - application/json
       responses:
@@ -1149,6 +1480,21 @@ paths:
         in: formData
         name: image
         type: file
+      - description: pitch type
+        enum:
+        - 1
+        - 2
+        - 3
+        in: formData
+        name: pitch_type
+        type: integer
+      - description: pitch extra
+        enum:
+        - 1
+        - 2
+        in: formData
+        name: pitch_extra
+        type: integer
       produces:
       - application/json
       responses:

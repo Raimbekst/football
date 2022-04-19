@@ -13,6 +13,8 @@ type Pitch struct {
 	BuildingId int    `json:"building_id" form:"building_id"`
 	Price      int    `json:"price" form:"price"`
 	Image      string `json:"image" form:"image"`
+	PitchType  int    `json:"pitch_type" form:"pitch_type" enums:"1,2,3"`
+	PitchExtra int    `json:"pitch_extra" form:"pitch_extra" enums:"1,2"`
 }
 
 type pitchFilter struct {
@@ -28,7 +30,7 @@ func (h *Handler) initPitchRoutes(api fiber.Router) {
 		admin := partner.Group("", jwtware.New(
 			jwtware.Config{
 				SigningKey: []byte(h.signingKey),
-			}))
+			}), isManager)
 		{
 			admin.Post("", h.createPitch)
 			admin.Put("/:id", h.updatePitch)
@@ -46,6 +48,8 @@ func (h *Handler) initPitchRoutes(api fiber.Router) {
 // @Param building_id formData int true "building id"
 // @Param price  formData int true "price for pitch"
 // @Param image formData file  true "pitch image"
+// @Param pitch_type formData int true "pitch type" Enums(1,2,3)
+// @Param pitch_extra formData int false "pitch extra" Enums(1,2)
 // @Success 201 {object} idResponse
 // @Failure 400,404 {object} response
 // @Failure 500 {object} response
@@ -77,6 +81,8 @@ func (h *Handler) createPitch(c *fiber.Ctx) error {
 		Image:      img,
 		BuildingId: input.BuildingId,
 		Price:      input.Price,
+		PitchType:  input.PitchType,
+		PitchExtra: input.PitchExtra,
 		ManagerId:  userId,
 	}
 
@@ -161,6 +167,8 @@ func (h *Handler) getPitchById(c *fiber.Ctx) error {
 // @Param building_id formData int false "building id"
 // @Param price  formData int false "price for pitch"
 // @Param image formData file  false "pitch image"
+// @Param pitch_type formData int false "pitch type" Enums(1,2,3)
+// @Param pitch_extra formData int false "pitch extra" Enums(1,2)
 // @Success 200 {object} okResponse
 // @Failure 400,404 {object} response
 // @Failure 500 {object} response
@@ -195,6 +203,8 @@ func (h *Handler) updatePitch(c *fiber.Ctx) error {
 		Image:      img,
 		BuildingId: input.BuildingId,
 		Price:      input.Price,
+		PitchType:  input.PitchType,
+		PitchExtra: input.PitchExtra,
 	}
 
 	if err := h.services.Pitch.Update(c, id, pitch); err != nil {
