@@ -139,7 +139,7 @@ var doc = `{
         },
         "/auth/reset-password-confirm": {
             "post": {
-                "description": "verify secret code for reset password",
+                "description": "reset password",
                 "consumes": [
                     "application/json"
                 ],
@@ -157,6 +157,63 @@ var doc = `{
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/domain.ResetPasswordInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.okResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/reset-password-verify-phone-number": {
+            "post": {
+                "description": "verify secret code for reset password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "parameters": [
+                    {
+                        "description": "verify phone number",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.VerifyPhoneNumberInput"
                         }
                     }
                 ],
@@ -2079,8 +2136,7 @@ var doc = `{
             "type": "object",
             "required": [
                 "new_password",
-                "phone_number",
-                "secret_code"
+                "phone_number"
             ],
             "properties": {
                 "confirm_new_password": {
@@ -2092,9 +2148,6 @@ var doc = `{
                     "minLength": 8
                 },
                 "phone_number": {
-                    "type": "string"
-                },
-                "secret_code": {
                     "type": "string"
                 }
             }
@@ -2132,6 +2185,21 @@ var doc = `{
                     "type": "string",
                     "maxLength": 64,
                     "minLength": 8
+                }
+            }
+        },
+        "domain.VerifyPhoneNumberInput": {
+            "type": "object",
+            "required": [
+                "phone_number",
+                "secret_code"
+            ],
+            "properties": {
+                "phone_number": {
+                    "type": "string"
+                },
+                "secret_code": {
+                    "type": "string"
                 }
             }
         },

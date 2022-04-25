@@ -154,8 +154,7 @@ func (u *UserAuthService) SetPassword(id int, input domain.SetPasswordInput) err
 
 func (u *UserAuthService) ResetPassword(phone string) (string, error) {
 
-	input, err := u.repos.VerifyViaPhoneNumber(phone)
-	fmt.Println(input)
+	_, err := u.repos.VerifyViaPhoneNumber(phone)
 
 	if err != nil {
 		return "", fmt.Errorf("service.ResetPassword: %w", err)
@@ -175,28 +174,44 @@ func (u *UserAuthService) ResetPassword(phone string) (string, error) {
 
 }
 
-func (u *UserAuthService) ResetPasswordConfirm(input domain.ResetPasswordInput) error {
+func (u *UserAuthService) VerifyPhoneNumber(input domain.VerifyPhoneNumberInput) error {
 	err := u.GetSecretCode(input.SecretCode, input.PhoneNumber)
 
 	if err != nil {
 		return fmt.Errorf("service.ResetPasswordConfirm: %w", err)
 	}
 
-	if input.NewPassword != input.ConfirmNewPassword {
-		return fmt.Errorf("service.SetPassword: %w", domain.ErrPasswordNotMatch)
+	err = u.redis.Set(u.ctx, input.PhoneNumber, true, 2*time.Minute).Err()
+
+	if err != nil {
+		return fmt.Errorf("service.VerifyPhoneNumber: %w", err)
 	}
 
-	hashedNewPassword, err := u.hashes.Hash(input.NewPassword)
+	return nil
+}
+
+func (u *UserAuthService) ResetPasswordConfirm(input domain.ResetPasswordInput) error {
+	_, err := u.redis.Get(u.ctx, input.PhoneNumber).Result()
 
 	if err != nil {
 		return fmt.Errorf("service.ResetPasswordConfirm: %w", err)
 	}
 
-	if err := u.repos.ResetPassword(input.PhoneNumber, hashedNewPassword); err != nil {
-		return fmt.Errorf("service.ResetPasswordConfirm : %w", err)
+	if input.NewPassword != input.ConfirmNewPassword {
+		return fmt.Errorf("service.ResetPasswordConfirm: %w", domain.ErrPasswordNotMatch)
 	}
-	return nil
 
+	hashPassword, err := u.hashes.Hash(input.NewPassword)
+
+	if err != nil {
+		return fmt.Errorf("service.ResetPasswordConfirm: %w", err)
+	}
+
+	if err := u.repos.ResetPassword(input.PhoneNumber, hashPassword); err != nil {
+		return fmt.Errorf("service.ResetPasswordConfirm: %w", err)
+	}
+
+	return nil
 }
 
 func (u *UserAuthService) UpdatePhoneNumberVerify(inp domain.User) (string, error) {
@@ -230,6 +245,7 @@ func (u *UserAuthService) SetSecretCode(phone string) (string, error) {
 		return "", fmt.Errorf("service.SetSecretCode: %w", err)
 	}
 	hashSecret, err := u.hashes.Hash(secret)
+
 	if err != nil {
 		return "", fmt.Errorf("service.SetSecretCode: %w", err)
 	}
@@ -242,13 +258,17 @@ func (u *UserAuthService) SetSecretCode(phone string) (string, error) {
 
 func (u *UserAuthService) GetSecretCode(code, phone string) error {
 	hashSecret, err := u.hashes.Hash(code)
+
 	if err != nil {
 		return fmt.Errorf("service.GetSecretCode: %w", err)
 	}
+
 	val, err := u.redis.Get(u.ctx, phone).Result()
+
 	if err != nil {
 		return fmt.Errorf("service.GetSecretCode: %w", err)
 	}
+
 	if val != hashSecret {
 		return fmt.Errorf("service.GetSecretCode: %w", domain.ErrInvalidSecretCode)
 	}

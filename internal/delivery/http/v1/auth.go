@@ -40,6 +40,7 @@ func (h *Handler) initUserRoutes(api fiber.Router) {
 		auth.Post("verify", h.verifyUser)
 		auth.Post("sign-in", h.userSignIn)
 		auth.Post("reset-password", h.resetPasswordVerify)
+		auth.Post("reset-password-verify-phone-number", h.verifyPhoneNumberForResetPassword)
 		auth.Post("reset-password-confirm", h.resetPasswordConfirm)
 
 		users := auth.Group("").Use(jwtware.New(
@@ -306,6 +307,44 @@ func (h *Handler) resetPasswordVerify(c *fiber.Ctx) error {
 
 // @Tags auth
 // @Description verify secret code for reset password
+// @ModuleID verifyPhoneNumberForResetPassword
+// @Accept json
+// @Produce json
+// @Param data body domain.VerifyPhoneNumberInput true "verify phone number"
+// @Success 200 {object} okResponse
+// @Failure 400,404 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /auth/reset-password-verify-phone-number [post]
+func (h *Handler) verifyPhoneNumberForResetPassword(c *fiber.Ctx) error {
+	var input domain.VerifyPhoneNumberInput
+
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(response{Message: err.Error()})
+	}
+
+	ok, errs := validationStructs.ValidateStruct(input)
+
+	if !ok {
+		return c.Status(fiber.StatusBadRequest).JSON(errs)
+	}
+
+	err := h.services.UserAuth.VerifyPhoneNumber(input)
+
+	if err != nil {
+
+		if errors.Is(err, sql.ErrNoRows) || errors.Is(err, domain.ErrInvalidSecretCode) {
+			return c.Status(fiber.StatusBadRequest).JSON(response{Message: err.Error()})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(response{Message: err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(okResponse{Message: "OK"})
+
+}
+
+// @Tags auth
+// @Description reset password
 // @ModuleID resetPasswordConfirm
 // @Accept json
 // @Produce json
@@ -332,7 +371,7 @@ func (h *Handler) resetPasswordConfirm(c *fiber.Ctx) error {
 
 	if err != nil {
 
-		if errors.Is(err, sql.ErrNoRows) || errors.Is(err, domain.ErrInvalidSecretCode) {
+		if errors.Is(err, sql.ErrNoRows) || errors.Is(err, domain.ErrInvalidSecretCode) || errors.Is(err, domain.ErrPasswordNotMatch) {
 			return c.Status(fiber.StatusBadRequest).JSON(response{Message: err.Error()})
 		}
 		return c.Status(fiber.StatusInternalServerError).JSON(response{Message: err.Error()})

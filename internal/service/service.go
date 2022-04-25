@@ -40,6 +40,7 @@ type UserAuth interface {
 	SetPassword(id int, input domain.SetPasswordInput) error
 
 	ResetPassword(phone string) (string, error)
+	VerifyPhoneNumber(input domain.VerifyPhoneNumberInput) error
 	ResetPasswordConfirm(input domain.ResetPasswordInput) error
 
 	UpdatePhoneNumberVerify(inp domain.User) (string, error)
