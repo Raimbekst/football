@@ -10,8 +10,8 @@ type User struct {
 }
 
 type VerifyUserInput struct {
-	Phone     string `json:"phone" validate:"required"`
-	PhoneCode string `json:"phone_code" validate:"required"`
+	Phone     string `json:"phone_number" validate:"required"`
+	PhoneCode string `json:"secret_code" validate:"required"`
 }
 
 type SetPasswordInput struct {

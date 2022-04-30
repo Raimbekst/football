@@ -141,13 +141,13 @@ definitions:
     type: object
   domain.VerifyUserInput:
     properties:
-      phone:
+      phone_number:
         type: string
-      phone_code:
+      secret_code:
         type: string
     required:
-    - phone
-    - phone_code
+    - phone_number
+    - secret_code
     type: object
   v1.Favourite:
     properties:

@@ -2002,14 +2002,14 @@ var doc = `{
         "domain.VerifyUserInput": {
             "type": "object",
             "required": [
-                "phone",
-                "phone_code"
+                "phone_number",
+                "secret_code"
             ],
             "properties": {
-                "phone": {
+                "phone_number": {
                     "type": "string"
                 },
-                "phone_code": {
+                "secret_code": {
                     "type": "string"
                 }
             }
