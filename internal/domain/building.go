@@ -1,18 +1,19 @@
 package domain
 
 type Building struct {
-	Id          int    `json:"id,omitempty" db:"id"`
-	Name        string `json:"name" db:"building_name"`
-	Address     string `json:"address" db:"address"`
-	Instagram   string `json:"instagram" db:"instagram"`
-	Description string `json:"description" db:"description"`
-	ManagerId   int    `json:"manager_id,omitempty" db:"manager_id"`
-	WorkTime    int    `json:"work_time,omitempty" db:"work_time"`
-	StartTime   string `json:"start_time,omitempty" db:"start_time"`
-	EndTime     string `json:"end_time,omitempty" db:"end_time"`
-	MinPrice    int    `json:"price,omitempty" db:"min_price"`
-	Longtitude  string `json:"longtitude,omitempty"  db:"longtitude"`
-	Latitude    string `json:"latitude,omitempty"    db:"latitude"`
+	Id            int    `json:"id,omitempty" db:"id"`
+	Name          string `json:"name" db:"building_name"`
+	Address       string `json:"address" db:"address"`
+	Instagram     string `json:"instagram" db:"instagram"`
+	Description   string `json:"description" db:"description"`
+	BuildingImage string `json:"building_image" db:"building_image"`
+	ManagerId     int    `json:"manager_id,omitempty" db:"manager_id"`
+	WorkTime      int    `json:"work_time,omitempty" db:"work_time"`
+	StartTime     string `json:"start_time,omitempty" db:"start_time"`
+	EndTime       string `json:"end_time,omitempty" db:"end_time"`
+	MinPrice      int    `json:"price" db:"min_price"`
+	Longtitude    string `json:"longtitude,omitempty"  db:"longtitude"`
+	Latitude      string `json:"latitude,omitempty"    db:"latitude"`
 }
 
 type UserInfo struct {

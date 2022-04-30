@@ -55,14 +55,6 @@ type Building interface {
 	Delete(c *fiber.Ctx, id int) error
 }
 
-type BuildingImage interface {
-	Create(c *fiber.Ctx, building domain.BuildingImage) (int, error)
-	GetAll(c *fiber.Ctx, page domain.Pagination, id int) (*domain.GetAllResponses, error)
-	GetById(c *fiber.Ctx, id int) (*domain.BuildingImage, error)
-	Update(c *fiber.Ctx, id int, inp domain.BuildingImage) error
-	Delete(c *fiber.Ctx, id int) error
-}
-
 type Pitch interface {
 	Create(ctx *fiber.Ctx, pitch domain.Pitch) (int, error)
 	GetAll(ctx *fiber.Ctx, page domain.Pagination, id int) (*domain.GetAllResponses, error)
@@ -86,7 +78,6 @@ type Order interface {
 type Service struct {
 	UserAuth
 	Building
-	BuildingImage
 	Pitch
 	Favourite
 	Order
@@ -105,11 +96,10 @@ type Deps struct {
 
 func NewService(deps Deps) *Service {
 	return &Service{
-		UserAuth:      NewUserAuthService(deps.Repos.UserAuth, deps.Hashes, deps.OtpPhone, deps.Redis, deps.Ctx, deps.TokenManager, deps.AccessTokenTTL, deps.RefreshTokenTTL),
-		Building:      NewBuildingService(deps.Repos.Building),
-		BuildingImage: NewBuildingImageService(deps.Repos.BuildingImage),
-		Pitch:         NewPitchService(deps.Repos.Pitch),
-		Favourite:     NewFavouriteService(deps.Repos.Favourite),
-		Order:         NewOrderService(deps.Repos.Order),
+		UserAuth:  NewUserAuthService(deps.Repos.UserAuth, deps.Hashes, deps.OtpPhone, deps.Redis, deps.Ctx, deps.TokenManager, deps.AccessTokenTTL, deps.RefreshTokenTTL),
+		Building:  NewBuildingService(deps.Repos.Building),
+		Pitch:     NewPitchService(deps.Repos.Pitch),
+		Favourite: NewFavouriteService(deps.Repos.Favourite),
+		Order:     NewOrderService(deps.Repos.Order),
 	}
 }

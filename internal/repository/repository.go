@@ -44,15 +44,7 @@ type Building interface {
 	Create(c *fiber.Ctx, building domain.Building) (int, error)
 	GetAll(c *fiber.Ctx, page domain.Pagination, info domain.UserInfo, building domain.FilterForBuilding) (*domain.GetAllResponses, error)
 	GetById(c *fiber.Ctx, id int) (*domain.Building, error)
-	Update(c *fiber.Ctx, id int, inp domain.Building) error
-	Delete(c *fiber.Ctx, id int) error
-}
-
-type BuildingImage interface {
-	Create(c *fiber.Ctx, building domain.BuildingImage) (int, error)
-	GetAll(c *fiber.Ctx, page domain.Pagination, id int) (*domain.GetAllResponses, error)
-	GetById(c *fiber.Ctx, id int) (*domain.BuildingImage, error)
-	Update(c *fiber.Ctx, id int, inp domain.BuildingImage) ([]string, error)
+	Update(c *fiber.Ctx, id int, inp domain.Building) ([]string, error)
 	Delete(c *fiber.Ctx, id int) ([]string, error)
 }
 
@@ -79,7 +71,6 @@ type Order interface {
 type Repository struct {
 	UserAuth
 	Building
-	BuildingImage
 	Pitch
 	Favourite
 	Order
@@ -87,12 +78,11 @@ type Repository struct {
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		UserAuth:      NewUserAuthRepos(db),
-		Building:      NewBuildingRepos(db),
-		BuildingImage: NewBuildingImageRepos(db),
-		Pitch:         NewPitchRepos(db),
-		Favourite:     NewFavouriteRepos(db),
-		Order:         NewOrderRepos(db),
+		UserAuth:  NewUserAuthRepos(db),
+		Building:  NewBuildingRepos(db),
+		Pitch:     NewPitchRepos(db),
+		Favourite: NewFavouriteRepos(db),
+		Order:     NewOrderRepos(db),
 	}
 }
 

@@ -27,9 +27,9 @@ func (b *BuildingRepos) Create(ctx *fiber.Ctx, building domain.Building) (int, e
 
 	defer cancel()
 
-	query := fmt.Sprintf("INSERT INTO %s(building_name, address, instagram, manager_id,description,work_time,start_time,end_time,longtitude,latitude) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id", buildingTable)
+	query := fmt.Sprintf("INSERT INTO %s(building_name, address, instagram, manager_id,description,building_image,work_time,start_time,end_time,longtitude,latitude) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id", buildingTable)
 
-	err := b.db.QueryRowx(query, building.Name, building.Address, building.Instagram, building.ManagerId, building.Description, building.WorkTime, building.StartTime, building.EndTime, building.Longtitude, building.Latitude).Scan(&id)
+	err := b.db.QueryRowx(query, building.Name, building.Address, building.Instagram, building.ManagerId, building.Description, building.BuildingImage, building.WorkTime, building.StartTime, building.EndTime, building.Longtitude, building.Latitude).Scan(&id)
 
 	if err != nil {
 		return 0, fmt.Errorf("repository.Create: %w", err)
@@ -47,6 +47,7 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 		whereValuesList  []string
 		havingValuesList []string
 		count            int
+		url              = ctx.BaseURL()
 	)
 
 	_, cancel := context.WithTimeout(ctx.Context(), 4*time.Second)
@@ -82,7 +83,7 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 		setValues = setValues + whereClause + whereValuesJoin
 	}
 
-	setValues = setValues + fmt.Sprintf(" GROUP BY b.id, building_name, address, instagram, manager_id, description, work_time, start_time, end_time,longtitude,latitude")
+	setValues = setValues + fmt.Sprintf(" GROUP BY b.id, building_name,building_image, address, instagram, manager_id, description, work_time, start_time, end_time,longtitude,latitude")
 
 	havingValuesJoin := strings.Join(havingValuesList, " AND ")
 
@@ -126,6 +127,10 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 		return nil, fmt.Errorf("repository.GetAll: %w", err)
 	}
 
+	for _, val := range inp {
+		val.BuildingImage = url + "/" + "media/" + val.BuildingImage
+	}
+
 	pages := domain.PaginationPage{
 		Page:  page.Page,
 		Pages: pagesCount,
@@ -143,6 +148,7 @@ func (b *BuildingRepos) GetById(ctx *fiber.Ctx, id int) (*domain.Building, error
 
 	var (
 		inp domain.Building
+		url = ctx.BaseURL()
 	)
 
 	_, cancel := context.WithTimeout(ctx.Context(), 4*time.Second)
@@ -160,9 +166,11 @@ func (b *BuildingRepos) GetById(ctx *fiber.Ctx, id int) (*domain.Building, error
 				ON 
 					b.id = p.building_id
 				WHERE b.id = $1
-					group by b.id, building_name, address, instagram, manager_id, description, work_time, start_time, end_time, longtitude, latitude;`, buildingTable, pitchTable)
+					group by b.id, building_name,building_image, address, instagram, manager_id, description, work_time, start_time, end_time, longtitude, latitude;`, buildingTable, pitchTable)
 
 	err := b.db.Get(&inp, query, id)
+
+	inp.BuildingImage = url + "/" + "media/" + inp.BuildingImage
 
 	if err != nil {
 		return nil, fmt.Errorf("repository.GetById: %w", domain.ErrNotFound)
@@ -171,9 +179,11 @@ func (b *BuildingRepos) GetById(ctx *fiber.Ctx, id int) (*domain.Building, error
 	return &inp, nil
 }
 
-func (b *BuildingRepos) Update(ctx *fiber.Ctx, id int, inp domain.Building) error {
+func (b *BuildingRepos) Update(ctx *fiber.Ctx, id int, inp domain.Building) ([]string, error) {
 
 	setValues := make([]string, 0, reflect.TypeOf(domain.Building{}).NumField())
+
+	var images []string
 
 	if inp.Name != "" {
 		setValues = append(setValues, fmt.Sprintf("building_name=:building_name"))
@@ -186,15 +196,31 @@ func (b *BuildingRepos) Update(ctx *fiber.Ctx, id int, inp domain.Building) erro
 	if inp.Instagram != "" {
 		setValues = append(setValues, fmt.Sprintf("instagram=:instagram"))
 	}
+	if inp.BuildingImage != "" {
+		setValues = append(setValues, fmt.Sprintf("building_image=:building_image"))
+		images = append(images, "building_image")
+	}
 
-	_, cancel := context.WithTimeout(ctx.Context(), 500*time.Millisecond)
+	_, cancel := context.WithTimeout(ctx.Context(), 4*time.Second)
 
 	defer cancel()
+
+	setImages := strings.Join(images, ", ")
+
+	var input domain.Building
+
+	querySelectImages := fmt.Sprintf("SELECT %s FROM %s WHERE id = $1", setImages, buildingTable)
+
+	err := b.db.Get(&input, querySelectImages, id)
+
+	images = nil
+
+	images = append(images, input.BuildingImage)
 
 	setQuery := strings.Join(setValues, ", ")
 
 	if setQuery == "" {
-		return fmt.Errorf("repository.Update: %w", errors.New("empty body"))
+		return nil, fmt.Errorf("repository.Update: %w", errors.New("empty body"))
 	}
 
 	query := fmt.Sprintf("UPDATE %s SET %s WHERE id = %d AND manager_id = %d", buildingTable, setQuery, id, inp.ManagerId)
@@ -202,39 +228,40 @@ func (b *BuildingRepos) Update(ctx *fiber.Ctx, id int, inp domain.Building) erro
 	result, err := b.db.NamedExec(query, inp)
 
 	if err != nil {
-		return fmt.Errorf("repository.Update: %w", err)
+		return nil, fmt.Errorf("repository.Update: %w", err)
 	}
 
 	affected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("repository.Update: %w", err)
+		return nil, fmt.Errorf("repository.Update: %w", err)
 	}
 
 	if affected == 0 {
-		return fmt.Errorf("repository.Update: %w", domain.ErrNotFound)
+		return nil, fmt.Errorf("repository.Update: %w", domain.ErrNotFound)
 	}
 
-	return nil
+	return images, nil
 }
-func (b *BuildingRepos) Delete(ctx *fiber.Ctx, id int) error {
+
+func (b *BuildingRepos) Delete(ctx *fiber.Ctx, id int) ([]string, error) {
+	var (
+		image  string
+		images []string
+	)
+
 	_, cancel := context.WithTimeout(ctx.Context(), 4*time.Second)
 
 	defer cancel()
 
-	query := fmt.Sprintf("DELETE FROM %s WHERE id=$1", buildingTable)
+	query := fmt.Sprintf("DELETE FROM %s WHERE id=$1 RETURNING building_image", buildingTable)
 
-	result, err := b.db.Exec(query, id)
+	err := b.db.QueryRowx(query, id).Scan(&image)
 
-	affected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("repository.Delete: %w", err)
+		return nil, fmt.Errorf("repository.Delete: %w", err)
 	}
-
-	if affected == 0 {
-		return fmt.Errorf("repository.Delete: %w", domain.ErrNotFound)
-	}
-
-	return nil
+	images = append(images, image)
+	return images, nil
 }
 
 func countPage(db *sqlx.DB, table, setValues string) (int, error) {

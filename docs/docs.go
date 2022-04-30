@@ -702,250 +702,6 @@ var doc = `{
                     }
                 ],
                 "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "building"
-                ],
-                "parameters": [
-                    {
-                        "description": "building create input",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/v1.Building"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/v1.idResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    },
-                    "default": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    }
-                }
-            }
-        },
-        "/building/image": {
-            "get": {
-                "description": "get all buildings",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "building"
-                ],
-                "operationId": "get-all-building",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "name": "building_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "page",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.GetAllResponses"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    },
-                    "default": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "User_Auth": []
-                    }
-                ],
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "building"
-                ],
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "building id",
-                        "name": "building_id",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "file",
-                        "description": "image of building",
-                        "name": "image",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/v1.idResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    },
-                    "default": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    }
-                }
-            }
-        },
-        "/building/image/{id}": {
-            "get": {
-                "description": "get building by id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "building"
-                ],
-                "operationId": "get-building-image-by-id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "building id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.BuildingImage"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    },
-                    "default": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "User_Auth": []
-                    }
-                ],
-                "description": "update  building",
-                "consumes": [
                     "multipart/form-data"
                 ],
                 "produces": [
@@ -957,87 +713,82 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "building id",
-                        "name": "id",
-                        "in": "path",
+                        "description": "building name",
+                        "name": "name",
+                        "in": "formData",
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "description": "building id",
-                        "name": "building_id",
+                        "type": "string",
+                        "description": "building address",
+                        "name": "address",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "building instagram",
+                        "name": "instagram",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "building description",
+                        "name": "description",
                         "in": "formData"
                     },
                     {
                         "type": "file",
-                        "description": "image of building",
+                        "description": "building image",
                         "name": "image",
-                        "in": "formData"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/v1.okResponse"
-                        }
+                        "in": "formData",
+                        "required": true
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    },
-                    "default": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
                     {
-                        "User_Auth": []
-                    }
-                ],
-                "description": "delete building",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "building"
-                ],
-                "parameters": [
+                        "enum": [
+                            1,
+                            2
+                        ],
+                        "type": "integer",
+                        "description": "work time type(1 - always,2 -your own choice)",
+                        "name": "work_time",
+                        "in": "formData",
+                        "required": true
+                    },
                     {
                         "type": "string",
-                        "description": "building id",
-                        "name": "id",
-                        "in": "path",
+                        "description": "start of work time",
+                        "name": "start_time",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "end of work time",
+                        "name": "end_time",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "longtitude",
+                        "name": "longtitude",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "latitude",
+                        "name": "latitude",
+                        "in": "formData",
                         "required": true
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/v1.okResponse"
+                            "$ref": "#/definitions/v1.idResponse"
                         }
                     },
                     "400": {
@@ -1130,7 +881,7 @@ var doc = `{
                 ],
                 "description": "update  building",
                 "consumes": [
-                    "application/json"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
@@ -1147,13 +898,69 @@ var doc = `{
                         "required": true
                     },
                     {
-                        "description": "building input",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/v1.UpdateBuilding"
-                        }
+                        "type": "string",
+                        "description": "building name",
+                        "name": "name",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "building address",
+                        "name": "address",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "building instagram",
+                        "name": "instagram",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "building description",
+                        "name": "description",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "building image",
+                        "name": "image",
+                        "in": "formData"
+                    },
+                    {
+                        "enum": [
+                            1,
+                            2
+                        ],
+                        "type": "integer",
+                        "description": "work time type(1 - always,2 -your own choice)",
+                        "name": "work_time",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "start of work time",
+                        "name": "start_time",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "end of work time",
+                        "name": "end_time",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "longtitude",
+                        "name": "longtitude",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "latitude",
+                        "name": "latitude",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -1990,6 +1797,9 @@ var doc = `{
                 "address": {
                     "type": "string"
                 },
+                "building_image": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -2025,27 +1835,13 @@ var doc = `{
                 }
             }
         },
-        "domain.BuildingImage": {
-            "type": "object",
-            "properties": {
-                "building_id": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "image": {
-                    "type": "string"
-                },
-                "manager_id": {
-                    "type": "integer"
-                }
-            }
-        },
         "domain.Favourite": {
             "type": "object",
             "properties": {
                 "address": {
+                    "type": "string"
+                },
+                "building_image": {
                     "type": "string"
                 },
                 "description": {
@@ -2218,52 +2014,6 @@ var doc = `{
                 }
             }
         },
-        "v1.Building": {
-            "type": "object",
-            "required": [
-                "address",
-                "description",
-                "end_time",
-                "latitude",
-                "longtitude",
-                "name",
-                "start_time",
-                "work_time"
-            ],
-            "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "end_time": {
-                    "type": "string"
-                },
-                "instagram": {
-                    "type": "string"
-                },
-                "latitude": {
-                    "type": "string"
-                },
-                "longtitude": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "start_time": {
-                    "type": "string"
-                },
-                "work_time": {
-                    "type": "integer",
-                    "enum": [
-                        1,
-                        2
-                    ]
-                }
-            }
-        },
         "v1.Favourite": {
             "type": "object",
             "required": [
@@ -2283,42 +2033,6 @@ var doc = `{
             "properties": {
                 "phone_number": {
                     "type": "string"
-                }
-            }
-        },
-        "v1.UpdateBuilding": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "end_time": {
-                    "type": "string"
-                },
-                "instagram": {
-                    "type": "string"
-                },
-                "latitude": {
-                    "type": "string"
-                },
-                "longtitude": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "start_time": {
-                    "type": "string"
-                },
-                "work_time": {
-                    "type": "integer",
-                    "enum": [
-                        1,
-                        2
-                    ]
                 }
             }
         },

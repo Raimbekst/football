@@ -48,14 +48,14 @@ func (p *PitchService) Update(ctx *fiber.Ctx, id int, inp domain.Pitch) error {
 func (p *PitchService) Delete(ctx *fiber.Ctx, id int) error {
 	img, err := p.repos.Delete(ctx, id)
 	if err != nil {
-		return fmt.Errorf("service.Update: %w", err)
+		return fmt.Errorf("service.Delete: %w", err)
 
 	}
 	for i, _ := range img {
 		if img[i] != "" {
 			err = media.DeleteImage(img[i])
 			if err != nil {
-				return fmt.Errorf("service.Update: %w", err)
+				return fmt.Errorf("service.Delete: %w", err)
 			}
 		}
 	}

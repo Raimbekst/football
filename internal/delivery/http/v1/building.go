@@ -2,42 +2,30 @@ package v1
 
 import (
 	"carWash/internal/domain"
-	"carWash/pkg/validation/validationStructs"
+	"carWash/pkg/media"
 	"errors"
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	jwtware "github.com/gofiber/jwt/v3"
+	"mime/multipart"
 	"strconv"
 )
 
 type Building struct {
-	Name        string `json:"name" validate:"required"`
-	Address     string `json:"address" validate:"required"`
-	Instagram   string `json:"instagram"`
-	Description string `json:"description" validate:"required"`
-	WorkTime    int    `json:"work_time"   validate:"required" enums:"1,2" examples:"1" `
-	StartTime   string `json:"start_time"  validate:"required"`
-	EndTime     string `json:"end_time"    validate:"required"`
-	Longtitude  string `json:"longtitude"  validate:"required"`
-	Latitude    string `json:"latitude"    validate:"required"`
-}
-
-type UpdateBuilding struct {
-	Name        string `json:"name"`
-	Address     string `json:"address"`
-	Instagram   string `json:"instagram"`
-	Description string `json:"description"`
-	WorkTime    int    `json:"work_time" enums:"1,2" examples:"1"`
-	StartTime   string `json:"start_time"`
-	EndTime     string `json:"end_time"`
-	Longtitude  string `json:"longtitude"`
-	Latitude    string `json:"latitude"`
+	Name          string                `json:"name" form:"name"`
+	Address       string                `json:"address" form:"address"`
+	Instagram     string                `json:"instagram" form:"instagram"`
+	Description   string                `json:"description" form:"description"`
+	BuildingImage *multipart.FileHeader `json:"building_image" form:"building_image"`
+	WorkTime      int                   `json:"work_time"   form:"work_time" enums:"1,2" examples:"1" `
+	StartTime     string                `json:"start_time"  form:"start_time"`
+	EndTime       string                `json:"end_time"    form:"end_time"`
+	Longtitude    string                `json:"longtitude"  form:"longtitude"`
+	Latitude      string                `json:"latitude"    form:"latitude"`
 }
 
 func (h *Handler) initBuildingRoutes(api fiber.Router) {
 	partner := api.Group("/building")
 	{
-		h.initBuildingImageRoutes(partner)
 		partner.Get("/", h.getAllBuildings)
 		partner.Get("/:id", h.getBuildingById)
 		admin := partner.Group("", jwtware.New(
@@ -55,9 +43,18 @@ func (h *Handler) initBuildingRoutes(api fiber.Router) {
 // @Security User_Auth
 // @Tags building
 // @ModuleID createBuilding
-// @Accept json
+// @Accept multipart/form-data
 // @Produce  json
-// @Param data body Building true "building create input"
+// @Param name formData string true "building name"
+// @Param address formData string true "building address"
+// @Param instagram formData string false "building instagram"
+// @Param description formData string false "building description"
+// @Param image formData file true "building image"
+// @Param work_time formData int true "work time type(1 - always,2 -your own choice)" Enums(1 ,2)
+// @Param start_time formData string true "start of work time"
+// @Param end_time   formData string true "end of work time"
+// @Param longtitude formData string true "longtitude"
+// @Param latitude   formData string true "latitude"
 // @Success 201 {object} idResponse
 // @Failure 400,404 {object} response
 // @Failure 500 {object} response
@@ -75,23 +72,29 @@ func (h *Handler) createBuilding(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(response{Message: err.Error()})
 	}
 
-	ok, errs := validationStructs.ValidateStruct(input)
+	input.BuildingImage, _ = c.FormFile("image")
+	var img string
 
-	if !ok {
-		return c.Status(fiber.StatusBadRequest).JSON(errs)
+	if input.BuildingImage != nil {
+		img, err = media.GetFileName(c, input.BuildingImage)
+
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(response{Message: err.Error()})
+		}
 	}
 
 	building := domain.Building{
-		Name:        input.Name,
-		Address:     input.Address,
-		Instagram:   input.Instagram,
-		ManagerId:   userId,
-		Description: input.Description,
-		WorkTime:    input.WorkTime,
-		StartTime:   input.StartTime,
-		EndTime:     input.EndTime,
-		Latitude:    input.Latitude,
-		Longtitude:  input.Longtitude,
+		Name:          input.Name,
+		Address:       input.Address,
+		Instagram:     input.Instagram,
+		ManagerId:     userId,
+		Description:   input.Description,
+		BuildingImage: img,
+		WorkTime:      input.WorkTime,
+		StartTime:     input.StartTime,
+		EndTime:       input.EndTime,
+		Latitude:      input.Latitude,
+		Longtitude:    input.Longtitude,
 	}
 
 	id, err := h.services.Building.Create(c, building)
@@ -143,8 +146,6 @@ func (h *Handler) getAllBuildings(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(response{err.Error()})
 	}
 
-	fmt.Println(info)
-
 	list, err := h.services.Building.GetAll(c, page, info, filter)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(response{err.Error()})
@@ -186,10 +187,19 @@ func (h *Handler) getBuildingById(c *fiber.Ctx) error {
 // @Tags building
 // @Description  update  building
 // @ModuleID updateBuilding
-// @Accept json
+// @Accept multipart/form-data
 // @Produce  json
 // @Param id path string true "building id"
-// @Param data body UpdateBuilding true "building input"
+// @Param name formData string false "building name"
+// @Param address formData string false "building address"
+// @Param instagram formData string false "building instagram"
+// @Param description formData string false "building description"
+// @Param image formData file false "building image"
+// @Param work_time formData int true "work time type(1 - always,2 -your own choice)" Enums(1 ,2)
+// @Param start_time formData string false "start of work time"
+// @Param end_time   formData string false "end of work time"
+// @Param longtitude formData string false "longtitude"
+// @Param latitude   formData string false "latitude"
 // @Success 200 {object} okResponse
 // @Failure 400,404 {object} response
 // @Failure 500 {object} response
@@ -197,7 +207,7 @@ func (h *Handler) getBuildingById(c *fiber.Ctx) error {
 // @Router /building/{id} [put]
 func (h *Handler) updateBuilding(c *fiber.Ctx) error {
 	var (
-		input UpdateBuilding
+		input Building
 		err   error
 	)
 
@@ -212,15 +222,28 @@ func (h *Handler) updateBuilding(c *fiber.Ctx) error {
 
 	_, userId := getUser(c)
 
+	input.BuildingImage, _ = c.FormFile("image")
+
+	var img string
+
+	if input.BuildingImage != nil {
+		img, err = media.GetFileName(c, input.BuildingImage)
+
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(response{Message: err.Error()})
+		}
+	}
+
 	building := domain.Building{
-		Name:        input.Name,
-		Address:     input.Address,
-		Instagram:   input.Instagram,
-		ManagerId:   userId,
-		Description: input.Description,
-		WorkTime:    input.WorkTime,
-		StartTime:   input.StartTime,
-		EndTime:     input.EndTime,
+		Name:          input.Name,
+		Address:       input.Address,
+		Instagram:     input.Instagram,
+		ManagerId:     userId,
+		BuildingImage: img,
+		Description:   input.Description,
+		WorkTime:      input.WorkTime,
+		StartTime:     input.StartTime,
+		EndTime:       input.EndTime,
 	}
 
 	if err := h.services.Building.Update(c, id, building); err != nil {

@@ -3,6 +3,8 @@ package service
 import (
 	"carWash/internal/domain"
 	"carWash/internal/repository"
+	"carWash/pkg/media"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -26,9 +28,35 @@ func (b *BuildingService) GetById(ctx *fiber.Ctx, id int) (*domain.Building, err
 }
 
 func (b *BuildingService) Update(ctx *fiber.Ctx, id int, inp domain.Building) error {
-	return b.repos.Update(ctx, id, inp)
+	img, err := b.repos.Update(ctx, id, inp)
+	if err != nil {
+		return fmt.Errorf("service.Update: %w", err)
+
+	}
+	for i, _ := range img {
+		if img[i] != "" {
+			err = media.DeleteImage(img[i])
+			if err != nil {
+				return fmt.Errorf("service.Update: %w", err)
+			}
+		}
+	}
+	return nil
 }
 
 func (b *BuildingService) Delete(ctx *fiber.Ctx, id int) error {
-	return b.repos.Delete(ctx, id)
+	img, err := b.repos.Delete(ctx, id)
+	if err != nil {
+		return fmt.Errorf("service.Delete: %w", err)
+
+	}
+	for i, _ := range img {
+		if img[i] != "" {
+			err = media.DeleteImage(img[i])
+			if err != nil {
+				return fmt.Errorf("service.Delete: %w", err)
+			}
+		}
+	}
+	return nil
 }

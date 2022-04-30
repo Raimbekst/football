@@ -4,6 +4,8 @@ definitions:
     properties:
       address:
         type: string
+      building_image:
+        type: string
       description:
         type: string
       end_time:
@@ -27,20 +29,11 @@ definitions:
       work_time:
         type: integer
     type: object
-  domain.BuildingImage:
-    properties:
-      building_id:
-        type: integer
-      id:
-        type: integer
-      image:
-        type: string
-      manager_id:
-        type: integer
-    type: object
   domain.Favourite:
     properties:
       address:
+        type: string
+      building_image:
         type: string
       description:
         type: string
@@ -156,39 +149,6 @@ definitions:
     - phone
     - phone_code
     type: object
-  v1.Building:
-    properties:
-      address:
-        type: string
-      description:
-        type: string
-      end_time:
-        type: string
-      instagram:
-        type: string
-      latitude:
-        type: string
-      longtitude:
-        type: string
-      name:
-        type: string
-      start_time:
-        type: string
-      work_time:
-        enum:
-        - 1
-        - 2
-        type: integer
-    required:
-    - address
-    - description
-    - end_time
-    - latitude
-    - longtitude
-    - name
-    - start_time
-    - work_time
-    type: object
   v1.Favourite:
     properties:
       building_id:
@@ -202,30 +162,6 @@ definitions:
         type: string
     required:
     - phone_number
-    type: object
-  v1.UpdateBuilding:
-    properties:
-      address:
-        type: string
-      description:
-        type: string
-      end_time:
-        type: string
-      instagram:
-        type: string
-      latitude:
-        type: string
-      longtitude:
-        type: string
-      name:
-        type: string
-      start_time:
-        type: string
-      work_time:
-        enum:
-        - 1
-        - 2
-        type: integer
     type: object
   v1.UpdateNumberInput:
     properties:
@@ -740,14 +676,59 @@ paths:
       - building
     post:
       consumes:
-      - application/json
+      - multipart/form-data
       parameters:
-      - description: building create input
-        in: body
-        name: data
+      - description: building name
+        in: formData
+        name: name
         required: true
-        schema:
-          $ref: '#/definitions/v1.Building'
+        type: string
+      - description: building address
+        in: formData
+        name: address
+        required: true
+        type: string
+      - description: building instagram
+        in: formData
+        name: instagram
+        type: string
+      - description: building description
+        in: formData
+        name: description
+        type: string
+      - description: building image
+        in: formData
+        name: image
+        required: true
+        type: file
+      - description: work time type(1 - always,2 -your own choice)
+        enum:
+        - 1
+        - 2
+        in: formData
+        name: work_time
+        required: true
+        type: integer
+      - description: start of work time
+        in: formData
+        name: start_time
+        required: true
+        type: string
+      - description: end of work time
+        in: formData
+        name: end_time
+        required: true
+        type: string
+      - description: longtitude
+        in: formData
+        name: longtitude
+        required: true
+        type: string
+      - description: latitude
+        in: formData
+        name: latitude
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -851,205 +832,6 @@ paths:
       - building
     put:
       consumes:
-      - application/json
-      description: update  building
-      parameters:
-      - description: building id
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: building input
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/v1.UpdateBuilding'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/v1.okResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/v1.response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/v1.response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/v1.response'
-        default:
-          description: ""
-          schema:
-            $ref: '#/definitions/v1.response'
-      security:
-      - User_Auth: []
-      tags:
-      - building
-  /building/image:
-    get:
-      consumes:
-      - application/json
-      description: get all buildings
-      operationId: get-all-building
-      parameters:
-      - in: query
-        name: building_id
-        type: integer
-      - in: query
-        name: limit
-        type: integer
-      - in: query
-        name: page
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/domain.GetAllResponses'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/v1.response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/v1.response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/v1.response'
-        default:
-          description: ""
-          schema:
-            $ref: '#/definitions/v1.response'
-      tags:
-      - building
-    post:
-      consumes:
-      - multipart/form-data
-      parameters:
-      - description: building id
-        in: formData
-        name: building_id
-        required: true
-        type: integer
-      - description: image of building
-        in: formData
-        name: image
-        required: true
-        type: file
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/v1.idResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/v1.response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/v1.response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/v1.response'
-        default:
-          description: ""
-          schema:
-            $ref: '#/definitions/v1.response'
-      security:
-      - User_Auth: []
-      tags:
-      - building
-  /building/image/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: delete building
-      parameters:
-      - description: building id
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/v1.okResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/v1.response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/v1.response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/v1.response'
-        default:
-          description: ""
-          schema:
-            $ref: '#/definitions/v1.response'
-      security:
-      - User_Auth: []
-      tags:
-      - building
-    get:
-      consumes:
-      - application/json
-      description: get building by id
-      operationId: get-building-image-by-id
-      parameters:
-      - description: building id
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/domain.BuildingImage'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/v1.response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/v1.response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/v1.response'
-        default:
-          description: ""
-          schema:
-            $ref: '#/definitions/v1.response'
-      tags:
-      - building
-    put:
-      consumes:
       - multipart/form-data
       description: update  building
       parameters:
@@ -1058,14 +840,50 @@ paths:
         name: id
         required: true
         type: string
-      - description: building id
+      - description: building name
         in: formData
-        name: building_id
-        type: integer
-      - description: image of building
+        name: name
+        type: string
+      - description: building address
+        in: formData
+        name: address
+        type: string
+      - description: building instagram
+        in: formData
+        name: instagram
+        type: string
+      - description: building description
+        in: formData
+        name: description
+        type: string
+      - description: building image
         in: formData
         name: image
         type: file
+      - description: work time type(1 - always,2 -your own choice)
+        enum:
+        - 1
+        - 2
+        in: formData
+        name: work_time
+        required: true
+        type: integer
+      - description: start of work time
+        in: formData
+        name: start_time
+        type: string
+      - description: end of work time
+        in: formData
+        name: end_time
+        type: string
+      - description: longtitude
+        in: formData
+        name: longtitude
+        type: string
+      - description: latitude
+        in: formData
+        name: latitude
+        type: string
       produces:
       - application/json
       responses:
