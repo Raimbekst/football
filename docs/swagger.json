@@ -1798,6 +1798,9 @@
                 "instagram": {
                     "type": "string"
                 },
+                "is_favourite": {
+                    "type": "boolean"
+                },
                 "latitude": {
                     "type": "string"
                 },
@@ -1841,6 +1844,9 @@
                 },
                 "instagram": {
                     "type": "string"
+                },
+                "is_favourite": {
+                    "type": "boolean"
                 },
                 "latitude": {
                     "type": "string"

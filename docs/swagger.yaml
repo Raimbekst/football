@@ -14,6 +14,8 @@ definitions:
         type: integer
       instagram:
         type: string
+      is_favourite:
+        type: boolean
       latitude:
         type: string
       longtitude:
@@ -43,6 +45,8 @@ definitions:
         type: integer
       instagram:
         type: string
+      is_favourite:
+        type: boolean
       latitude:
         type: string
       longtitude:

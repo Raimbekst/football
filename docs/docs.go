@@ -1812,6 +1812,9 @@ var doc = `{
                 "instagram": {
                     "type": "string"
                 },
+                "is_favourite": {
+                    "type": "boolean"
+                },
                 "latitude": {
                     "type": "string"
                 },
@@ -1855,6 +1858,9 @@ var doc = `{
                 },
                 "instagram": {
                     "type": "string"
+                },
+                "is_favourite": {
+                    "type": "boolean"
                 },
                 "latitude": {
                     "type": "string"

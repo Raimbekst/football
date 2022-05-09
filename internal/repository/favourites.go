@@ -44,6 +44,8 @@ func (f *FavouriteRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, userId i
 
 	defer cancel()
 
+	setValues = fmt.Sprintf(" WHERE user_id = %d", userId)
+
 	count, err := countPage(f.db, favouriteTable, setValues)
 
 	if err != nil {
@@ -68,11 +70,11 @@ func (f *FavouriteRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, userId i
 					%s bu
 				ON 
 					f.building_id = bu.id
-				WHERE f.user_id = $1
+				%s
 				    ORDER BY
-				f.id ASC LIMIT $2 OFFSET $3`, favouriteTable, buildingTable)
+				f.id ASC LIMIT $1 OFFSET $2`, favouriteTable, buildingTable, setValues)
 
-	err = f.db.Select(&inp, query, userId, page.Limit, offset)
+	err = f.db.Select(&inp, query, page.Limit, offset)
 
 	if err != nil {
 		return nil, fmt.Errorf("repository.GetAll: %w", err)

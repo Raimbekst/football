@@ -14,6 +14,7 @@ type Building struct {
 	MinPrice      int    `json:"price" db:"min_price"`
 	Longtitude    string `json:"longtitude,omitempty"  db:"longtitude"`
 	Latitude      string `json:"latitude,omitempty"    db:"latitude"`
+	IsFavourite   bool   `json:"is_favourite" db:"is_favourite"`
 }
 
 type UserInfo struct {

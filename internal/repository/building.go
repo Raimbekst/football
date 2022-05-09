@@ -47,6 +47,7 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 		whereValuesList  []string
 		havingValuesList []string
 		count            int
+		userIdCase       string
 		url              = ctx.BaseURL()
 	)
 
@@ -58,6 +59,13 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 
 	case "manager":
 		whereValuesList = append(whereValuesList, fmt.Sprintf("manager_id = %d", info.Id))
+	case "user":
+		fmt.Println(info.Id)
+		userIdCase = fmt.Sprintf(
+			`,CASE 
+						WHEN f.user_id = %d THEN true 
+						ELSE false 
+					END is_favourite`, info.Id)
 	}
 
 	if building.PitchType != 0 {
@@ -83,7 +91,7 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 		setValues = setValues + whereClause + whereValuesJoin
 	}
 
-	setValues = setValues + fmt.Sprintf(" GROUP BY b.id, building_name,building_image, address, instagram, manager_id, description, work_time, start_time, end_time,longtitude,latitude")
+	setValues = setValues + fmt.Sprintf(" GROUP BY b.id,b.building_image, building_name,building_image, address, instagram, manager_id, description, work_time, start_time, end_time,longtitude,latitude,f.user_id")
 
 	havingValuesJoin := strings.Join(havingValuesList, " AND ")
 
@@ -101,7 +109,11 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 					%s p
 				ON  
 					b.id = p.building_id
-				%s`, buildingTable, pitchTable, countValues)
+				LEFT OUTER JOIN 
+					%s f
+				ON 
+					b.id = f.building_id
+				%s`, buildingTable, pitchTable, favouriteTable, countValues)
 
 	_ = b.db.QueryRowx(queryCount).Scan(&count)
 
@@ -113,13 +125,19 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 		`SELECT 
 					b.*,
 					COALESCE(min(price),null,0) as min_price
+					%s	
 				FROM 
 					%s b
 				LEFT OUTER JOIN 
 					%s p
 				ON 
 					b.id = p.building_id
-				%s ORDER BY b.id ASC LIMIT $1 OFFSET $2`, buildingTable, pitchTable, setValues)
+				LEFT OUTER JOIN 
+					%s f
+				ON 
+					b.id = f.building_id
+				%s 
+					ORDER BY b.id ASC LIMIT $1 OFFSET $2`, userIdCase, buildingTable, pitchTable, favouriteTable, setValues)
 
 	err := b.db.Select(&inp, query, page.Limit, offset)
 
