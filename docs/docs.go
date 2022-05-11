@@ -1827,6 +1827,9 @@ var doc = `{
                 "name": {
                     "type": "string"
                 },
+                "phone_number": {
+                    "type": "string"
+                },
                 "price": {
                     "type": "integer"
                 },
@@ -1872,6 +1875,9 @@ var doc = `{
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "phone_number": {
                     "type": "string"
                 },
                 "price": {

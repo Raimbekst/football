@@ -60,7 +60,6 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 	case "manager":
 		whereValuesList = append(whereValuesList, fmt.Sprintf("manager_id = %d", info.Id))
 	case "user":
-		fmt.Println(info.Id)
 		userIdCase = fmt.Sprintf(
 			`,CASE 
 						WHEN f.user_id = %d THEN true 
@@ -91,7 +90,7 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 		setValues = setValues + whereClause + whereValuesJoin
 	}
 
-	setValues = setValues + fmt.Sprintf(" GROUP BY b.id,b.building_image, building_name,building_image, address, instagram, manager_id, description, work_time, start_time, end_time,longtitude,latitude,f.user_id")
+	setValues = setValues + fmt.Sprintf(" GROUP BY b.id,b.building_image, building_name,building_image, address, instagram, manager_id, description, work_time, start_time, end_time,longtitude,latitude,f.user_id,u.phone_number")
 
 	havingValuesJoin := strings.Join(havingValuesList, " AND ")
 
@@ -113,7 +112,11 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 					%s f
 				ON 
 					b.id = f.building_id
-				%s`, buildingTable, pitchTable, favouriteTable, countValues)
+				LEFT OUTER JOIN 
+					%s u
+				ON
+					b.manager_id = u.id	
+				%s`, buildingTable, pitchTable, favouriteTable, userTable, countValues)
 
 	_ = b.db.QueryRowx(queryCount).Scan(&count)
 
@@ -124,6 +127,7 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 	query := fmt.Sprintf(
 		`SELECT 
 					b.*,
+					u.phone_number,
 					COALESCE(min(price),null,0) as min_price
 					%s	
 				FROM 
@@ -136,8 +140,13 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 					%s f
 				ON 
 					b.id = f.building_id
-				%s 
-					ORDER BY b.id ASC LIMIT $1 OFFSET $2`, userIdCase, buildingTable, pitchTable, favouriteTable, setValues)
+				LEFT OUTER JOIN 
+					%s u 
+				ON 
+					b.manager_id = u.id
+				%s
+				ORDER BY
+					b.id ASC LIMIT $1 OFFSET $2`, userIdCase, buildingTable, pitchTable, favouriteTable, userTable, setValues)
 
 	err := b.db.Select(&inp, query, page.Limit, offset)
 
@@ -162,29 +171,50 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 	return &ans, nil
 }
 
-func (b *BuildingRepos) GetById(ctx *fiber.Ctx, id int) (*domain.Building, error) {
+func (b *BuildingRepos) GetById(ctx *fiber.Ctx, info domain.UserInfo, id int) (*domain.Building, error) {
 
 	var (
-		inp domain.Building
-		url = ctx.BaseURL()
+		inp        domain.Building
+		url        = ctx.BaseURL()
+		userIdCase string
 	)
 
 	_, cancel := context.WithTimeout(ctx.Context(), 4*time.Second)
 
 	defer cancel()
 
+	if info.Type == "user" {
+		userIdCase = fmt.Sprintf(
+			`,CASE 
+						WHEN f.user_id = %d THEN true 
+						ELSE false 
+					END is_favourite`, info.Id)
+	}
+
 	query := fmt.Sprintf(`
 				SELECT 
 					b.*,
+					u.phone_number,	
 					COALESCE(min(price),null,0) as min_price
+					%s
 				FROM 
 					%s b
 				LEFT OUTER JOIN 
 					%s p
 				ON 
 					b.id = p.building_id
-				WHERE b.id = $1
-					group by b.id, building_name,building_image, address, instagram, manager_id, description, work_time, start_time, end_time, longtitude, latitude;`, buildingTable, pitchTable)
+				LEFT OUTER JOIN 
+					%s f
+				ON 
+					b.id = f.building_id
+				LEFT OUTER JOIN 
+					%s u 
+				ON 
+					b.manager_id = u.id
+				WHERE 
+					b.id = $1
+				GROUP BY 
+					b.id, building_name,building_image, address, instagram, manager_id, description, work_time, start_time, end_time, longtitude, latitude,f.user_id,u.phone_number;`, userIdCase, buildingTable, pitchTable, favouriteTable, userTable)
 
 	err := b.db.Get(&inp, query, id)
 

@@ -172,7 +172,20 @@ func (h *Handler) getBuildingById(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(response{Message: err.Error()})
 	}
 
-	list, err := h.services.Building.GetById(c, id)
+	header := string(c.Request().Header.Peek("Authorization"))
+
+	userId, userType, err := h.userIdentity(header)
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(response{err.Error()})
+	}
+
+	info := domain.UserInfo{
+		Id:   userId,
+		Type: userType,
+	}
+
+	list, err := h.services.Building.GetById(c, info, id)
 
 	if err != nil {
 		if errors.Is(err, domain.ErrNotFound) {

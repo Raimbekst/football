@@ -1813,6 +1813,9 @@
                 "name": {
                     "type": "string"
                 },
+                "phone_number": {
+                    "type": "string"
+                },
                 "price": {
                     "type": "integer"
                 },
@@ -1858,6 +1861,9 @@
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "phone_number": {
                     "type": "string"
                 },
                 "price": {

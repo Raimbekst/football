@@ -24,6 +24,8 @@ definitions:
         type: integer
       name:
         type: string
+      phone_number:
+        type: string
       price:
         type: integer
       start_time:
@@ -54,6 +56,8 @@ definitions:
       manager_id:
         type: integer
       name:
+        type: string
+      phone_number:
         type: string
       price:
         type: integer

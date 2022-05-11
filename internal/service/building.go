@@ -23,8 +23,8 @@ func (b *BuildingService) GetAll(ctx *fiber.Ctx, page domain.Pagination, info do
 	return b.repos.GetAll(ctx, page, info, building)
 }
 
-func (b *BuildingService) GetById(ctx *fiber.Ctx, id int) (*domain.Building, error) {
-	return b.repos.GetById(ctx, id)
+func (b *BuildingService) GetById(ctx *fiber.Ctx, info domain.UserInfo, id int) (*domain.Building, error) {
+	return b.repos.GetById(ctx, info, id)
 }
 
 func (b *BuildingService) Update(ctx *fiber.Ctx, id int, inp domain.Building) error {

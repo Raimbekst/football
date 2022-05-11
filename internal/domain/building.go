@@ -4,6 +4,7 @@ type Building struct {
 	Id            int    `json:"id,omitempty" db:"id"`
 	Name          string `json:"name" db:"building_name"`
 	Address       string `json:"address" db:"address"`
+	PhoneNumber   string `json:"phone_number" db:"phone_number"`
 	Instagram     string `json:"instagram" db:"instagram"`
 	Description   string `json:"description" db:"description"`
 	BuildingImage string `json:"building_image" db:"building_image"`

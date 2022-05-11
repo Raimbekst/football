@@ -50,7 +50,7 @@ type UserAuth interface {
 type Building interface {
 	Create(c *fiber.Ctx, building domain.Building) (int, error)
 	GetAll(c *fiber.Ctx, page domain.Pagination, info domain.UserInfo, building domain.FilterForBuilding) (*domain.GetAllResponses, error)
-	GetById(c *fiber.Ctx, id int) (*domain.Building, error)
+	GetById(c *fiber.Ctx, info domain.UserInfo, id int) (*domain.Building, error)
 	Update(c *fiber.Ctx, id int, inp domain.Building) error
 	Delete(c *fiber.Ctx, id int) error
 }
