@@ -69,6 +69,7 @@ definitions:
   domain.GetAllResponses:
     properties:
       data: {}
+      extra_field: {}
       page_info:
         $ref: '#/definitions/domain.PaginationPage'
     type: object
@@ -156,6 +157,21 @@ definitions:
     required:
     - phone_number
     - secret_code
+    type: object
+  v1.Comment:
+    properties:
+      building_id:
+        type: integer
+      comment:
+        type: string
+      grade:
+        enum:
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        type: integer
     type: object
   v1.Favourite:
     properties:
@@ -919,6 +935,84 @@ paths:
       - User_Auth: []
       tags:
       - building
+  /comment:
+    get:
+      consumes:
+      - application/json
+      description: get all comments
+      operationId: get-all-comments
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: building_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.GetAllResponses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - comment
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: comment info
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/v1.Comment'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.idResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - comment
   /favourite:
     get:
       consumes:

@@ -75,12 +75,18 @@ type Order interface {
 	GetAll(ctx *fiber.Ctx, page domain.Pagination, info domain.UserInfo, date float64) (*domain.GetAllResponses, error)
 }
 
+type Comment interface {
+	Create(ctx *fiber.Ctx, comment domain.Comment) (int, error)
+	GetAll(ctx *fiber.Ctx, page domain.Pagination, buildingId int) (*domain.GetAllResponses, error)
+}
+
 type Service struct {
 	UserAuth
 	Building
 	Pitch
 	Favourite
 	Order
+	Comment
 }
 
 type Deps struct {
@@ -101,5 +107,6 @@ func NewService(deps Deps) *Service {
 		Pitch:     NewPitchService(deps.Repos.Pitch),
 		Favourite: NewFavouriteService(deps.Repos.Favourite),
 		Order:     NewOrderService(deps.Repos.Order),
+		Comment:   NewCommentService(deps.Repos.Comment),
 	}
 }

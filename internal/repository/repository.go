@@ -15,6 +15,7 @@ const (
 	pitchTable         = "pitches"
 	favouriteTable     = "favourites"
 	orderTable         = "orders"
+	commentTable       = "comments"
 )
 
 type FavouriteInput struct {
@@ -68,12 +69,18 @@ type Order interface {
 	GetAll(ctx *fiber.Ctx, page domain.Pagination, info domain.UserInfo, date float64) (*domain.GetAllResponses, error)
 }
 
+type Comment interface {
+	Create(ctx *fiber.Ctx, comment domain.Comment) (int, error)
+	GetAll(ctx *fiber.Ctx, page domain.Pagination, buildingId int) (*domain.GetAllResponses, error)
+}
+
 type Repository struct {
 	UserAuth
 	Building
 	Pitch
 	Favourite
 	Order
+	Comment
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
@@ -83,6 +90,7 @@ func NewRepository(db *sqlx.DB) *Repository {
 		Pitch:     NewPitchRepos(db),
 		Favourite: NewFavouriteRepos(db),
 		Order:     NewOrderRepos(db),
+		Comment:   NewCommentRepos(db),
 	}
 }
 

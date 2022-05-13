@@ -12,4 +12,5 @@ var (
 	ErrInvalidSecretCode = errors.New("неверный секретный код")
 	ErrInvalidPassword   = errors.New("неверный старый пароль")
 	ErrNotFound          = errors.New("не найдено")
+	ErrUserCommented     = errors.New("пользователь уже коммент оставил")
 )

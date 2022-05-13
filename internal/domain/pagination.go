@@ -12,6 +12,7 @@ type PaginationPage struct {
 }
 
 type GetAllResponses struct {
-	Data     interface{}    `json:"data"`
-	PageInfo PaginationPage `json:"page_info"`
+	Data       interface{}    `json:"data"`
+	PageInfo   PaginationPage `json:"page_info"`
+	ExtraField interface{}    `json:"extra_field,omitempty"`
 }

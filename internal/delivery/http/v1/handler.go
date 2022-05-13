@@ -31,6 +31,7 @@ func (h *Handler) Init(api fiber.Router) {
 		h.initBuildingRoutes(v1)
 		h.initPitchRoutes(v1)
 		h.initFavouriteRoutes(v1)
+		h.initCommentRoutes(v1)
 	}
 }
 
