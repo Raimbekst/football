@@ -16,7 +16,7 @@ type Building struct {
 	Longtitude    string `json:"longitude,omitempty"  db:"longtitude"`
 	Latitude      string `json:"latitude,omitempty"    db:"latitude"`
 	IsFavourite   bool   `json:"is_favourite" db:"is_favourite"`
-	Favourite     `json:"favourite" db:"f"`
+	Favourite     `json:"favourite,omitempty" db:"f"`
 }
 
 type UserInfo struct {
