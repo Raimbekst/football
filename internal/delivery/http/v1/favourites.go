@@ -104,7 +104,7 @@ func (h *Handler) getAllFavourites(c *fiber.Ctx) error {
 // @ID get-favourite-by-id
 // @Accept  json
 // @Produce  json
-// @Param id path string true "favourite id"
+// @Param id path string true "building id"
 // @Success 200 {object} domain.Favourite
 // @Failure 400,404 {object} response
 // @Failure 500 {object} response
@@ -136,7 +136,7 @@ func (h *Handler) getFavouriteById(c *fiber.Ctx) error {
 // @ModuleID deleteFavourite
 // @Accept  json
 // @Produce  json
-// @Param id path string true "favourite id"
+// @Param id path string true "building id"
 // @Success 200 {object} okResponse
 // @Failure 400,404 {object} response
 // @Failure 500 {object} response

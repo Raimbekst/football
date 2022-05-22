@@ -13,9 +13,10 @@ type Building struct {
 	StartTime     string `json:"start_time,omitempty" db:"start_time"`
 	EndTime       string `json:"end_time,omitempty" db:"end_time"`
 	MinPrice      int    `json:"price" db:"min_price"`
-	Longtitude    string `json:"longtitude,omitempty"  db:"longtitude"`
+	Longtitude    string `json:"longitude,omitempty"  db:"longtitude"`
 	Latitude      string `json:"latitude,omitempty"    db:"latitude"`
 	IsFavourite   bool   `json:"is_favourite" db:"is_favourite"`
+	Favourite     `json:"favourite" db:"f"`
 }
 
 type UserInfo struct {

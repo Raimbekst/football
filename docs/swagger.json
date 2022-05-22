@@ -1309,7 +1309,7 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "favourite id",
+                        "description": "building id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1367,7 +1367,7 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "favourite id",
+                        "description": "building id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1378,6 +1378,129 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/v1.okResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/grade": {
+            "get": {
+                "description": "get all grades",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "grade"
+                ],
+                "operationId": "get-all-grades",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "building_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.GetAllResponses"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "User_Auth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "grade"
+                ],
+                "parameters": [
+                    {
+                        "description": "grade info",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.Grade"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/v1.idResponse"
                         }
                     },
                     "400": {
@@ -1927,7 +2050,7 @@
                 "latitude": {
                     "type": "string"
                 },
-                "longtitude": {
+                "longitude": {
                     "type": "string"
                 },
                 "manager_id": {
@@ -1953,49 +2076,7 @@
         "domain.Favourite": {
             "type": "object",
             "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "building_image": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "end_time": {
-                    "type": "string"
-                },
                 "id": {
-                    "type": "integer"
-                },
-                "instagram": {
-                    "type": "string"
-                },
-                "is_favourite": {
-                    "type": "boolean"
-                },
-                "latitude": {
-                    "type": "string"
-                },
-                "longtitude": {
-                    "type": "string"
-                },
-                "manager_id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "phone_number": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "integer"
-                },
-                "start_time": {
-                    "type": "string"
-                },
-                "work_time": {
                     "type": "integer"
                 }
             }
@@ -2144,16 +2225,6 @@
                 },
                 "comment": {
                     "type": "string"
-                },
-                "grade": {
-                    "type": "integer",
-                    "enum": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        5
-                    ]
                 }
             }
         },
@@ -2165,6 +2236,24 @@
             "properties": {
                 "building_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "v1.Grade": {
+            "type": "object",
+            "properties": {
+                "building_id": {
+                    "type": "integer"
+                },
+                "grade": {
+                    "type": "integer",
+                    "enum": [
+                        1,
+                        2,
+                        3,
+                        4,
+                        5
+                    ]
                 }
             }
         },

@@ -8,8 +8,12 @@ import (
 
 type Comment struct {
 	CommentText string `json:"comment"`
-	Grade       int    `json:"grade" enums:"1,2,3,4,5"`
 	BuildingId  int    `json:"building_id"`
+}
+
+type Grade struct {
+	Grade      int `json:"grade"  enums:"1,2,3,4,5"`
+	BuildingId int `json:"building_id"`
 }
 
 func (h *Handler) initCommentRoutes(api fiber.Router) {
@@ -23,6 +27,21 @@ func (h *Handler) initCommentRoutes(api fiber.Router) {
 			}), isUser)
 		{
 			admin.Post("", h.createComment)
+		}
+	}
+}
+
+func (h *Handler) initGradeRoutes(api fiber.Router) {
+
+	partner := api.Group("/grade")
+	{
+		partner.Get("/", h.getAllGrades)
+		admin := partner.Group("", jwtware.New(
+			jwtware.Config{
+				SigningKey: []byte(h.signingKey),
+			}), isUser)
+		{
+			admin.Post("", h.createGrade)
 		}
 	}
 }
@@ -51,10 +70,43 @@ func (h *Handler) createComment(c *fiber.Ctx) error {
 		CommentText: input.CommentText,
 		UserId:      userId,
 		BuildingId:  input.BuildingId,
-		Grade:       input.Grade,
 	}
 
 	id, err := h.services.Comment.Create(c, inp)
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(response{Message: err.Error()})
+	}
+	return c.Status(fiber.StatusCreated).JSON(idResponse{ID: id})
+}
+
+// @Security User_Auth
+// @Tags grade
+// @ModuleID createGrade
+// @Accept json
+// @Produce json
+// @Param data body Grade true "grade info"
+// @Success 201 {object} idResponse
+// @Failure 400,404 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /grade [post]
+func (h *Handler) createGrade(c *fiber.Ctx) error {
+	var input Grade
+
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(response{Message: err.Error()})
+	}
+
+	_, userId := getUser(c)
+
+	inp := domain.Grade{
+		UserId:     userId,
+		BuildingId: input.BuildingId,
+		Grade:      input.Grade,
+	}
+
+	id, err := h.services.Comment.CreateGrade(c, inp)
 
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(response{Message: err.Error()})
@@ -87,6 +139,39 @@ func (h *Handler) getAllComments(c *fiber.Ctx) error {
 	}
 
 	list, err := h.services.Comment.GetAll(c, page, filter.BuildingId)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(response{err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(list)
+
+}
+
+// @Tags grade
+// @Description get all grades
+// @ID get-all-grades
+// @Accept json
+// @Produce json
+// @Param array query domain.Pagination true "a page info"
+// @Param filter query pitchFilter true "comment filter"
+// @Success 200 {object} domain.GetAllResponses
+// @Failure 400,404 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /grade [get]
+func (h *Handler) getAllGrades(c *fiber.Ctx) error {
+	var page domain.Pagination
+	var filter pitchFilter
+
+	if err := c.QueryParser(&page); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(response{err.Error()})
+	}
+
+	if err := c.QueryParser(&filter); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(response{err.Error()})
+	}
+
+	list, err := h.services.Comment.GetAllGrades(c, page, filter.BuildingId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(response{err.Error()})
 	}

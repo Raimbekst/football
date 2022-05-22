@@ -66,7 +66,7 @@ type Pitch interface {
 type Favourite interface {
 	Create(ctx *fiber.Ctx, input FavouriteInput) (int, error)
 	GetAll(ctx *fiber.Ctx, page domain.Pagination, id int) (*domain.GetAllResponses, error)
-	GetById(ctx *fiber.Ctx, id, userId int) (*domain.Favourite, error)
+	GetById(ctx *fiber.Ctx, id, userId int) (*domain.Building, error)
 	Delete(ctx *fiber.Ctx, id, userId int) error
 }
 
@@ -78,6 +78,8 @@ type Order interface {
 type Comment interface {
 	Create(ctx *fiber.Ctx, comment domain.Comment) (int, error)
 	GetAll(ctx *fiber.Ctx, page domain.Pagination, buildingId int) (*domain.GetAllResponses, error)
+	CreateGrade(ctx *fiber.Ctx, grade domain.Grade) (int, error)
+	GetAllGrades(ctx *fiber.Ctx, page domain.Pagination, buildingId int) (*domain.GetAllResponses, error)
 }
 
 type Service struct {

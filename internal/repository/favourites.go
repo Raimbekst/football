@@ -37,52 +37,57 @@ func (f *FavouriteRepos) Create(ctx *fiber.Ctx, input FavouriteInput) (int, erro
 
 func (f *FavouriteRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, userId int) (*domain.GetAllResponses, error) {
 	var (
-		setValues string
+		count int
+		url   = ctx.BaseURL()
 	)
 
 	_, cancel := context.WithTimeout(ctx.Context(), 4*time.Second)
 
 	defer cancel()
 
-	setValues = fmt.Sprintf(" WHERE user_id = %d", userId)
+	inp := make([]*domain.Building, 0)
 
-	count, err := countPage(f.db, favouriteTable, setValues)
+	query := fmt.Sprintf(
+		`SELECT
+					b.*,
+					u.phone_number,
+					COALESCE(min(price),null,0) as min_price,
+					f.id  "f.id"
+				FROM 
+					%s b
+				LEFT OUTER JOIN 
+					%s p
+				ON 
+					b.id = p.building_id
+				LEFT OUTER JOIN 
+					%s f
+				ON 
+					b.id = f.building_id
+				LEFT OUTER JOIN 
+					%s u 
+				ON 
+					b.manager_id = u.id
+				WHERE 
+					f.user_id = $1
+				group by
+    				b.id,b.building_image, building_name,
+    				address, instagram,
+					manager_id, description,
+    				work_time, start_time,
+    				end_time, longtitude, latitude,f.id, f.user_id, u.phone_number`, buildingTable, pitchTable, favouriteTable, userTable)
+
+	err := f.db.Select(&inp, query, userId)
 
 	if err != nil {
 		return nil, fmt.Errorf("repository.GetAll: %w", err)
 	}
 
-	offset, pagesCount := calculatePagination(&page, count)
-
-	inp := make([]*domain.Favourite, 0, page.Limit)
-
-	query := fmt.Sprintf(
-		`SELECT 
-					f.id,
-					bu.id "b.id",
-					bu.building_name "b.building_name",
-					bu.address "b.address",
-					bu.instagram "b.instagram", 
-					bu.description "b.description" 
-				FROM 
-					%s f
-				INNER JOIN 
-					%s bu
-				ON 
-					f.building_id = bu.id
-				%s
-				    ORDER BY
-				f.id ASC LIMIT $1 OFFSET $2`, favouriteTable, buildingTable, setValues)
-
-	err = f.db.Select(&inp, query, page.Limit, offset)
-
-	if err != nil {
-		return nil, fmt.Errorf("repository.GetAll: %w", err)
+	for _, val := range inp {
+		val.BuildingImage = url + "/" + "media/" + val.BuildingImage
 	}
 
 	pages := domain.PaginationPage{
 		Page:  page.Page,
-		Pages: pagesCount,
 		Count: count,
 	}
 
@@ -90,13 +95,12 @@ func (f *FavouriteRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, userId i
 		Data:     inp,
 		PageInfo: pages,
 	}
-
 	return &ans, nil
 }
 
-func (f *FavouriteRepos) GetById(ctx *fiber.Ctx, id, userId int) (*domain.Favourite, error) {
+func (f *FavouriteRepos) GetById(ctx *fiber.Ctx, id, userId int) (*domain.Building, error) {
 	var (
-		inp domain.Favourite
+		inp domain.Building
 	)
 
 	_, cancel := context.WithTimeout(ctx.Context(), 4*time.Second)
@@ -104,25 +108,38 @@ func (f *FavouriteRepos) GetById(ctx *fiber.Ctx, id, userId int) (*domain.Favour
 	defer cancel()
 
 	query := fmt.Sprintf(
-		`SELECT 
-					f.id "id",
-					bu.id "b.id",
-					bu.building_name "b.building_name",
-					bu.address "b.address",
-					bu.instagram "b.instagram",
-					bu.description "b.description" 
+		`SELECT
+					b.*,
+					u.phone_number,
+					COALESCE(min(price),null,0) as min_price,
+					f.id  "f.id"
 				FROM 
 					%s f
-				INNER JOIN 
-					%s bu
+				INNER 	JOIN 
+					%s b
 				ON 
-					f.building_id = bu.id
+					b.id = f.building_id
+				LEFT OUTER JOIN 
+					%s p
+				ON 
+					b.id = p.building_id
+				LEFT OUTER JOIN 
+					%s u 
+				ON 
+					b.manager_id = u.id
+				WHERE 
+					f.user_id = $1 AND f.building_id = $2
+				group by
+    				b.id,b.building_image, building_name,
+    				address, instagram,
+					manager_id, description,
+    				work_time, start_time,
+    				end_time, longtitude, latitude,f.id, f.user_id, u.phone_number`, favouriteTable, buildingTable, pitchTable, userTable)
 
-				WHERE f.id = $1 AND f.user_id = $2`, favouriteTable, buildingTable)
-
-	err := f.db.Get(&inp, query, id, userId)
+	err := f.db.Get(&inp, query, userId, id)
 
 	if err != nil {
+
 		return nil, fmt.Errorf("repository.GetById: %w", domain.ErrNotFound)
 	}
 
@@ -135,7 +152,7 @@ func (f *FavouriteRepos) Delete(ctx *fiber.Ctx, id, userId int) error {
 
 	defer cancel()
 
-	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1 AND user_id = $2", favouriteTable)
+	query := fmt.Sprintf("DELETE FROM %s WHERE building_id = $1 AND user_id = $2", favouriteTable)
 
 	result, err := f.db.Exec(query, id, userId)
 

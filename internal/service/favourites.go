@@ -25,7 +25,7 @@ func (f *FavouriteService) GetAll(ctx *fiber.Ctx, page domain.Pagination, id int
 	return f.repos.GetAll(ctx, page, id)
 }
 
-func (f *FavouriteService) GetById(ctx *fiber.Ctx, id, userId int) (*domain.Favourite, error) {
+func (f *FavouriteService) GetById(ctx *fiber.Ctx, id, userId int) (*domain.Building, error) {
 	return f.repos.GetById(ctx, id, userId)
 }
 

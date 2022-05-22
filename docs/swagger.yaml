@@ -18,7 +18,7 @@ definitions:
         type: boolean
       latitude:
         type: string
-      longtitude:
+      longitude:
         type: string
       manager_id:
         type: integer
@@ -35,35 +35,7 @@ definitions:
     type: object
   domain.Favourite:
     properties:
-      address:
-        type: string
-      building_image:
-        type: string
-      description:
-        type: string
-      end_time:
-        type: string
       id:
-        type: integer
-      instagram:
-        type: string
-      is_favourite:
-        type: boolean
-      latitude:
-        type: string
-      longtitude:
-        type: string
-      manager_id:
-        type: integer
-      name:
-        type: string
-      phone_number:
-        type: string
-      price:
-        type: integer
-      start_time:
-        type: string
-      work_time:
         type: integer
     type: object
   domain.GetAllResponses:
@@ -164,6 +136,18 @@ definitions:
         type: integer
       comment:
         type: string
+    type: object
+  v1.Favourite:
+    properties:
+      building_id:
+        type: integer
+    required:
+    - building_id
+    type: object
+  v1.Grade:
+    properties:
+      building_id:
+        type: integer
       grade:
         enum:
         - 1
@@ -172,13 +156,6 @@ definitions:
         - 4
         - 5
         type: integer
-    type: object
-  v1.Favourite:
-    properties:
-      building_id:
-        type: integer
-    required:
-    - building_id
     type: object
   v1.PhoneNumberInput:
     properties:
@@ -1097,7 +1074,7 @@ paths:
       - application/json
       description: delete favourite
       parameters:
-      - description: favourite id
+      - description: building id
         in: path
         name: id
         required: true
@@ -1135,7 +1112,7 @@ paths:
       description: get favourite by id
       operationId: get-favourite-by-id
       parameters:
-      - description: favourite id
+      - description: building id
         in: path
         name: id
         required: true
@@ -1167,6 +1144,84 @@ paths:
       - User_Auth: []
       tags:
       - favourite
+  /grade:
+    get:
+      consumes:
+      - application/json
+      description: get all grades
+      operationId: get-all-grades
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: building_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.GetAllResponses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - grade
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: grade info
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/v1.Grade'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.idResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - grade
   /order:
     get:
       consumes:

@@ -21,3 +21,12 @@ func (c *CommentService) GetAll(ctx *fiber.Ctx, page domain.Pagination, building
 func (c *CommentService) Create(ctx *fiber.Ctx, comment domain.Comment) (int, error) {
 	return c.repos.Create(ctx, comment)
 }
+
+func (c *CommentService) CreateGrade(ctx *fiber.Ctx, grade domain.Grade) (int, error) {
+	return c.repos.CreateGrade(ctx, grade)
+
+}
+
+func (c *CommentService) GetAllGrades(ctx *fiber.Ctx, page domain.Pagination, buildingId int) (*domain.GetAllResponses, error) {
+	return c.repos.GetAllGrades(ctx, page, buildingId)
+}
