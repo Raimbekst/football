@@ -19,14 +19,22 @@ func NewFavouriteRepos(db *sqlx.DB) *FavouriteRepos {
 
 func (f *FavouriteRepos) Create(ctx *fiber.Ctx, input FavouriteInput) (int, error) {
 	var id int
-
+	var inp domain.Favourite
 	_, cancel := context.WithTimeout(ctx.Context(), time.Second*4)
 
 	defer cancel()
 
+	querySelect := fmt.Sprintf("SELECT id FROM %s WHERE user_id = $1 AND building_id = $2", favouriteTable)
+
+	err := f.db.Get(&inp, querySelect, input.UserId, input.BuildingId)
+
+	if err == nil {
+		return 0, fmt.Errorf("repository.Create: %w", domain.ErrBuildingExistINFavourites)
+	}
+
 	query := fmt.Sprintf("INSERT INTO %s(user_id,building_id) VALUES($1,$2) RETURNING id", favouriteTable)
 
-	err := f.db.QueryRowx(query, input.UserId, input.BuildingId).Scan(&id)
+	err = f.db.QueryRowx(query, input.UserId, input.BuildingId).Scan(&id)
 
 	if err != nil {
 		return 0, fmt.Errorf("repository.Create: %w", err)
@@ -84,6 +92,7 @@ func (f *FavouriteRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, userId i
 
 	for _, val := range inp {
 		val.BuildingImage = url + "/" + "media/" + val.BuildingImage
+		val.IsFavourite = true
 	}
 
 	pages := domain.PaginationPage{
@@ -137,6 +146,8 @@ func (f *FavouriteRepos) GetById(ctx *fiber.Ctx, id, userId int) (*domain.Buildi
     				end_time, longtitude, latitude,f.id, f.user_id, u.phone_number`, favouriteTable, buildingTable, pitchTable, userTable)
 
 	err := f.db.Get(&inp, query, userId, id)
+
+	inp.IsFavourite = true
 
 	if err != nil {
 

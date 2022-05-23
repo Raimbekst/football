@@ -59,6 +59,9 @@ func (h *Handler) createFavourite(c *fiber.Ctx) error {
 	})
 
 	if err != nil {
+		if errors.Is(err, domain.ErrBuildingExistINFavourites) {
+			return c.Status(fiber.StatusBadRequest).JSON(response{Message: err.Error()})
+		}
 		return c.Status(fiber.StatusInternalServerError).JSON(response{Message: err.Error()})
 	}
 
