@@ -110,6 +110,13 @@ definitions:
     - current_password
     - new_password
     type: object
+  domain.UserUpdate:
+    properties:
+      name:
+        type: string
+      phone_number:
+        type: string
+    type: object
   domain.VerifyPhoneNumberInput:
     properties:
       phone_number:
@@ -143,6 +150,11 @@ definitions:
         type: integer
     required:
     - building_id
+    type: object
+  v1.Feedback:
+    properties:
+      text:
+        type: string
     type: object
   v1.Grade:
     properties:
@@ -542,6 +554,76 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/v1.response'
+      tags:
+      - auth
+  /auth/user:
+    get:
+      consumes:
+      - application/json
+      description: get user info
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.okResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - auth
+    put:
+      consumes:
+      - application/json
+      description: update user info
+      parameters:
+      - description: a user update info
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserUpdate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.okResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
       tags:
       - auth
   /auth/user/sign-up:
@@ -1144,6 +1226,81 @@ paths:
       - User_Auth: []
       tags:
       - favourite
+  /feedback:
+    get:
+      consumes:
+      - application/json
+      description: gets all feedbacks
+      operationId: get-all-feedback
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.GetAllResponses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - feedback
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: feedback input
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/v1.Feedback'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.idResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - feedback
   /grade:
     get:
       consumes:

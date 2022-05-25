@@ -17,6 +17,7 @@ const (
 	orderTable         = "orders"
 	commentTable       = "comments"
 	gradeTable         = "grades"
+	feedbackTable      = "feedbacks"
 )
 
 type FavouriteInput struct {
@@ -27,6 +28,7 @@ type UserAuth interface {
 	VerifyExistenceUser(phone string, activated bool) (*domain.User, error)
 
 	UpdateUser(user domain.User, id int) error
+	UpdateUserInfo(user domain.UserUpdate, id int) error
 	CreateUser(user domain.User) (int, error)
 	Verify(phone string) error
 
@@ -78,6 +80,11 @@ type Comment interface {
 	GetAllGrades(ctx *fiber.Ctx, page domain.Pagination, buildingId int) (*domain.GetAllResponses, error)
 }
 
+type Feedback interface {
+	Create(ctx *fiber.Ctx, feedback domain.Feedback, id int) (int, error)
+	GetAll(ctx *fiber.Ctx, page domain.Pagination) (*domain.GetAllResponses, error)
+}
+
 type Repository struct {
 	UserAuth
 	Building
@@ -85,6 +92,7 @@ type Repository struct {
 	Favourite
 	Order
 	Comment
+	Feedback
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
@@ -95,6 +103,7 @@ func NewRepository(db *sqlx.DB) *Repository {
 		Favourite: NewFavouriteRepos(db),
 		Order:     NewOrderRepos(db),
 		Comment:   NewCommentRepos(db),
+		Feedback:  NewFeedbackRepos(db),
 	}
 }
 

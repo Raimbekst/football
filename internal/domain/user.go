@@ -9,6 +9,11 @@ type User struct {
 	IsActivated string `json:"is_activated,omitempty" db:"is_activated"`
 }
 
+type UserUpdate struct {
+	Name        *string `json:"name" db:"user_name"`
+	PhoneNumber *string `json:"phone_number" db:"phone_number"`
+}
+
 type VerifyUserInput struct {
 	Phone     string `json:"phone_number" validate:"required"`
 	PhoneCode string `json:"secret_code" validate:"required"`

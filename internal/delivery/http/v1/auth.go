@@ -48,6 +48,8 @@ func (h *Handler) initUserRoutes(api fiber.Router) {
 				SigningKey: []byte(h.signingKey),
 			}), isUser)
 		{
+			users.Get("user", h.getUser)
+			users.Put("user", h.updateUser)
 			users.Post("set-password", h.userSetPassword)
 			users.Post("set-phone-number-verify", h.updateNumber)
 			users.Post("set-phone-number-confirm", h.updateNumberConfirm)
@@ -441,4 +443,59 @@ func (h *Handler) updateNumberConfirm(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(okResponse{Message: "OK"})
+}
+
+// @Tags auth
+// @Security User_Auth
+// @Description get user info
+// @ModuleID getUser
+// @Accept  json
+// @Produce  json
+// @Success 201 {object} okResponse
+// @Failure 400,404 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /auth/user [get]
+func (h *Handler) getUser(c *fiber.Ctx) error {
+
+	_, id := getUser(c)
+
+	list, err := h.services.UserAuth.GetUserInfo(id)
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(response{Message: err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(list)
+}
+
+// @Tags auth
+// @Security User_Auth
+// @Description update user info
+// @ModuleID getUser
+// @Accept  json
+// @Produce  json
+// @Param data body domain.UserUpdate true "a user update info"
+// @Success 201 {object} okResponse
+// @Failure 400,404 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /auth/user [put]
+func (h *Handler) updateUser(c *fiber.Ctx) error {
+
+	var inp domain.UserUpdate
+
+	if err := c.BodyParser(&inp); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(response{Message: err.Error()})
+	}
+
+	_, id := getUser(c)
+
+	err := h.services.UserAuth.UpdateUserInfo(inp, id)
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(response{Message: err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON("OK")
 }

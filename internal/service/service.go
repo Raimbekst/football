@@ -45,6 +45,9 @@ type UserAuth interface {
 
 	UpdatePhoneNumberVerify(inp domain.User) (string, error)
 	UpdatePhoneNumberConfirm(input domain.ResetPhoneNumberInput, id int) error
+
+	GetUserInfo(id int) (*domain.User, error)
+	UpdateUserInfo(user domain.UserUpdate, id int) error
 }
 
 type Building interface {
@@ -82,6 +85,11 @@ type Comment interface {
 	GetAllGrades(ctx *fiber.Ctx, page domain.Pagination, buildingId int) (*domain.GetAllResponses, error)
 }
 
+type Feedback interface {
+	Create(ctx *fiber.Ctx, feedback domain.Feedback, id int) (int, error)
+	GetAll(ctx *fiber.Ctx, page domain.Pagination) (*domain.GetAllResponses, error)
+}
+
 type Service struct {
 	UserAuth
 	Building
@@ -89,6 +97,7 @@ type Service struct {
 	Favourite
 	Order
 	Comment
+	Feedback
 }
 
 type Deps struct {
@@ -110,5 +119,6 @@ func NewService(deps Deps) *Service {
 		Favourite: NewFavouriteService(deps.Repos.Favourite),
 		Order:     NewOrderService(deps.Repos.Order),
 		Comment:   NewCommentService(deps.Repos.Comment),
+		Feedback:  NewFeedbackService(deps.Repos.Feedback),
 	}
 }

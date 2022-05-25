@@ -275,6 +275,14 @@ func (u *UserAuthService) GetSecretCode(code, phone string) error {
 	return nil
 }
 
+func (u *UserAuthService) GetUserInfo(id int) (*domain.User, error) {
+	return u.repos.GetUser(id)
+}
+
+func (u *UserAuthService) UpdateUserInfo(user domain.UserUpdate, id int) error {
+	return u.repos.UpdateUserInfo(user, id)
+}
+
 func (u *UserAuthService) createSession(userId int, userType string) (*Tokens, error) {
 	var (
 		res Tokens

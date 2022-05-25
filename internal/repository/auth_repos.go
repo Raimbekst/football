@@ -14,6 +14,44 @@ type UserAuthRepos struct {
 	db *sqlx.DB
 }
 
+func (u *UserAuthRepos) UpdateUserInfo(user domain.UserUpdate, id int) error {
+
+	setValues := make([]string, 0, reflect.TypeOf(domain.UserUpdate{}).NumField())
+
+	if user.Name != nil {
+		setValues = append(setValues, fmt.Sprintf("user_name=:user_name"))
+	}
+
+	if user.PhoneNumber != nil {
+		setValues = append(setValues, fmt.Sprintf("phone_number=:phone_number"))
+	}
+
+	setQuery := strings.Join(setValues, ", ")
+
+	if setQuery == "" {
+		return fmt.Errorf("repository.Update: %w", errors.New("empty body"))
+	}
+
+	query := fmt.Sprintf("UPDATE %s SET %s WHERE id = %d", userTable, setQuery, id)
+
+	result, err := u.db.NamedExec(query, user)
+
+	if err != nil {
+		return fmt.Errorf("repository.Update: %w", err)
+	}
+
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("repository.UpdateUser: %w", err)
+	}
+
+	if affected == 0 {
+		return fmt.Errorf("repository.UpdateUser: %w", domain.ErrNotFound)
+	}
+
+	return nil
+}
+
 func NewUserAuthRepos(db *sqlx.DB) *UserAuthRepos {
 	return &UserAuthRepos{db: db}
 }
@@ -125,7 +163,7 @@ func (u *UserAuthRepos) Verify(phone string) error {
 
 func (u *UserAuthRepos) GetUser(id int) (*domain.User, error) {
 	var inp domain.User
-	query := fmt.Sprintf("SELECT id,user_name,email,phone_number FROM %s WHERE id = $1", userTable)
+	query := fmt.Sprintf("SELECT id,user_name,user_type,phone_number FROM %s WHERE id = $1", userTable)
 
 	err := u.db.Get(&inp, query, id)
 

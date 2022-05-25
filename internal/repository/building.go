@@ -47,6 +47,7 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 		whereValuesList  []string
 		havingValuesList []string
 		count            int
+		userId           int
 		userIdCase       string
 		url              = ctx.BaseURL()
 	)
@@ -65,6 +66,7 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 						WHEN f.user_id = %d THEN true 
 						ELSE false 
 					END is_favourite`, info.Id)
+		userId = info.Id
 	}
 
 	if building.PitchType != 0 {
@@ -95,28 +97,32 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 	havingValuesJoin := strings.Join(havingValuesList, " AND ")
 
 	if havingValuesList != nil {
-		countValues = countValues + havingClause + havingValuesJoin
-		setValues = setValues + havingClause + havingValuesJoin
+		havingValuesJoin = havingClause + havingValuesJoin
+		setValues = setValues + havingValuesJoin
 	}
 
 	queryCount := fmt.Sprintf(
-		`SELECT 
-					count(distinct b.id) 
-				FROM
-					%s b
-				LEFT OUTER  JOIN 
-					%s p
-				ON  
-					b.id = p.building_id
-				LEFT OUTER JOIN 
-					%s f
-				ON 
-					b.id = f.building_id
-				LEFT OUTER JOIN 
-					%s u
-				ON
-					b.manager_id = u.id	
-				%s`, buildingTable, pitchTable, favouriteTable, userTable, countValues)
+		`WITH new_building AS 
+					(SELECT 
+							count(distinct b.id) 
+						FROM
+							%s b
+						LEFT OUTER  JOIN 
+							%s p
+						ON  
+							b.id = p.building_id
+						LEFT OUTER JOIN 
+							%s f
+						ON 
+							b.id = f.building_id
+						LEFT OUTER JOIN 
+							%s u
+						ON
+							b.manager_id = u.id	
+						%s
+						GROUP BY b.id
+					%s)
+			 SELECT COUNT(*) FROM new_building ;`, buildingTable, pitchTable, favouriteTable, userTable, countValues, havingValuesJoin)
 
 	_ = b.db.QueryRowx(queryCount).Scan(&count)
 
@@ -139,17 +145,17 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 				LEFT OUTER JOIN 
 					%s f
 				ON 
-					b.id = f.building_id
+					(b.id = f.building_id AND f.user_id = %d)
 				LEFT OUTER JOIN 
 					%s u 
 				ON 
 					b.manager_id = u.id
 				%s
 				ORDER BY
-					b.id ASC LIMIT $1 OFFSET $2`, userIdCase, buildingTable, pitchTable, favouriteTable, userTable, setValues)
+					b.id ASC LIMIT $1 OFFSET $2`, userIdCase, buildingTable, pitchTable, favouriteTable, userId, userTable, setValues)
 
 	err := b.db.Select(&inp, query, page.Limit, offset)
-
+	fmt.Println(query)
 	if err != nil {
 		return nil, fmt.Errorf("repository.GetAll: %w", err)
 	}
