@@ -69,7 +69,8 @@ func (c *CommentRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, buildingId
 
 	query := fmt.Sprintf(
 		`SELECT
-					com.id,u.user_name,building_id,comment
+					com.id,u.user_name,building_id,comment,
+				extract(epoch from post_data::timestamp at time zone 'GMT') "post_data"
 				FROM 
 					%s com  
 				INNER JOIN 
@@ -84,6 +85,14 @@ func (c *CommentRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, buildingId
 
 	if err != nil {
 		return nil, fmt.Errorf("repository.GetAll: %w", err)
+	}
+
+	var grd domain.Grade
+	for _, val := range inp {
+
+		queryGetGrade := fmt.Sprintf("SELECT grade FROM %s", gradeTable)
+		_ = c.db.Get(&grd, queryGetGrade)
+		val.Grade = grd.Grade
 	}
 
 	pages := domain.PaginationPage{

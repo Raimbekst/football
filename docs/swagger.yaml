@@ -161,13 +161,7 @@ definitions:
       building_id:
         type: integer
       grade:
-        enum:
-        - 1
-        - 2
-        - 3
-        - 4
-        - 5
-        type: integer
+        type: number
     type: object
   v1.PhoneNumberInput:
     properties:

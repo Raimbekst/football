@@ -12,8 +12,8 @@ type Comment struct {
 }
 
 type Grade struct {
-	Grade      int `json:"grade"  enums:"1,2,3,4,5"`
-	BuildingId int `json:"building_id"`
+	Grade      float64 `json:"grade"`
+	BuildingId int     `json:"building_id"`
 }
 
 func (h *Handler) initCommentRoutes(api fiber.Router) {

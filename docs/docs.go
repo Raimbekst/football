@@ -2508,14 +2508,7 @@ var doc = `{
                     "type": "integer"
                 },
                 "grade": {
-                    "type": "integer",
-                    "enum": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        5
-                    ]
+                    "type": "number"
                 }
             }
         },
