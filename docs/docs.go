@@ -1651,68 +1651,6 @@ var doc = `{
             }
         },
         "/grade": {
-            "get": {
-                "description": "get all grades",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "grade"
-                ],
-                "operationId": "get-all-grades",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "building_id",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.GetAllResponses"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    },
-                    "default": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
@@ -1726,7 +1664,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "grade"
+                    "comment"
                 ],
                 "parameters": [
                     {
@@ -2280,6 +2218,9 @@ var doc = `{
                 },
                 "end_time": {
                     "type": "string"
+                },
+                "grade": {
+                    "type": "number"
                 },
                 "id": {
                     "type": "integer"

@@ -35,7 +35,6 @@ func (h *Handler) initGradeRoutes(api fiber.Router) {
 
 	partner := api.Group("/grade")
 	{
-		partner.Get("/", h.getAllGrades)
 		admin := partner.Group("", jwtware.New(
 			jwtware.Config{
 				SigningKey: []byte(h.signingKey),
@@ -81,7 +80,7 @@ func (h *Handler) createComment(c *fiber.Ctx) error {
 }
 
 // @Security User_Auth
-// @Tags grade
+// @Tags comment
 // @ModuleID createGrade
 // @Accept json
 // @Produce json
@@ -139,39 +138,6 @@ func (h *Handler) getAllComments(c *fiber.Ctx) error {
 	}
 
 	list, err := h.services.Comment.GetAll(c, page, filter.BuildingId)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(response{err.Error()})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(list)
-
-}
-
-// @Tags grade
-// @Description get all grades
-// @ID get-all-grades
-// @Accept json
-// @Produce json
-// @Param array query domain.Pagination true "a page info"
-// @Param filter query pitchFilter true "comment filter"
-// @Success 200 {object} domain.GetAllResponses
-// @Failure 400,404 {object} response
-// @Failure 500 {object} response
-// @Failure default {object} response
-// @Router /grade [get]
-func (h *Handler) getAllGrades(c *fiber.Ctx) error {
-	var page domain.Pagination
-	var filter pitchFilter
-
-	if err := c.QueryParser(&page); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(response{err.Error()})
-	}
-
-	if err := c.QueryParser(&filter); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(response{err.Error()})
-	}
-
-	list, err := h.services.Comment.GetAllGrades(c, page, filter.BuildingId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(response{err.Error()})
 	}

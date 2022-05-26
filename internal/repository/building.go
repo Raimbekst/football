@@ -162,6 +162,20 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 
 	for _, val := range inp {
 		val.BuildingImage = url + "/" + "media/" + val.BuildingImage
+
+		query := fmt.Sprintf(
+			`SELECT
+					coalesce(AVG(grade),null,0) 
+				FROM 
+					%s WHERE building_id = $1`, gradeTable)
+
+		row := b.db.QueryRow(query, val.Id)
+		err = row.Scan(&val.Grade)
+
+		if err != nil {
+			return nil, fmt.Errorf("repository.GetAll: %w", err)
+		}
+
 	}
 
 	pages := domain.PaginationPage{
