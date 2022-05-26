@@ -13,7 +13,7 @@ db:
 
 
 auth:
-  accessTokenTTL: 2h
+  accessTokenTTL: 720h
   refreshTokenTTL: 720h #30 days
 
 redis:
