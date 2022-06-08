@@ -23,17 +23,41 @@ func NewBuildingRepos(db *sqlx.DB) *BuildingRepos {
 func (b *BuildingRepos) Create(ctx *fiber.Ctx, building domain.Building) (int, error) {
 	var id int
 
+	tx := b.db.MustBegin()
+
 	_, cancel := context.WithTimeout(ctx.Context(), 4*time.Second)
 
 	defer cancel()
 
 	query := fmt.Sprintf("INSERT INTO %s(building_name, address, instagram, manager_id,description,building_image,work_time,start_time,end_time,longtitude,latitude) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id", buildingTable)
 
-	err := b.db.QueryRowx(query, building.Name, building.Address, building.Instagram, building.ManagerId, building.Description, building.BuildingImage, building.WorkTime, building.StartTime, building.EndTime, building.Longtitude, building.Latitude).Scan(&id)
+	err := tx.QueryRowx(query, building.Name, building.Address, building.Instagram, building.ManagerId, building.Description, building.BuildingImage, building.WorkTime, secondToTime(building.StartTime), secondToTime(building.EndTime), building.Longtitude, building.Latitude).Scan(&id)
 
 	if err != nil {
+		txErr := tx.Rollback()
+		if txErr != nil {
+			return 0, fmt.Errorf("repository.Create: %w", txErr)
+		}
 		return 0, fmt.Errorf("repository.Create: %w", err)
 	}
+
+	for i := building.StartTime; i <= building.EndTime; i = i + 1800 {
+		query := fmt.Sprintf("INSERT INTO %s(work_time, building_id) VALUES($1,$2)", timeTable)
+		_, err := tx.Exec(query, secondToTime(i), id)
+		if err != nil {
+			txErr := tx.Rollback()
+			if txErr != nil {
+				return 0, fmt.Errorf("repository.Create: %w", txErr)
+			}
+			return 0, fmt.Errorf("repository.Create: %w", err)
+		}
+	}
+
+	txErr := tx.Commit()
+	if txErr != nil {
+		return 0, fmt.Errorf("repository.Create: %w", txErr)
+	}
+
 	return id, nil
 }
 
@@ -343,4 +367,15 @@ func countPage(db *sqlx.DB, table, setValues string) (int, error) {
 		return 0, fmt.Errorf("repository.countPage : %w", err)
 	}
 	return count, nil
+}
+
+func secondToTime(a int) string {
+	min := a / 60
+
+	a = a % 60
+
+	hh := min / 60
+
+	min = min % 60
+	return fmt.Sprintf("%d:%d", hh, min)
 }

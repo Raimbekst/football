@@ -26,6 +26,7 @@ func NewHandler(services *service.Service, tokenManager auth.TokenManager, signi
 func (h *Handler) Init(api fiber.Router) {
 	v1 := api.Group("/v1")
 	{
+		h.initFootServiceRoutes(v1)
 		h.initUserRoutes(v1)
 		h.initOrderRoutes(v1)
 		h.initBuildingRoutes(v1)
@@ -34,6 +35,7 @@ func (h *Handler) Init(api fiber.Router) {
 		h.initCommentRoutes(v1)
 		h.initGradeRoutes(v1)
 		h.initFeedbackRoutes(v1)
+		h.initCardRoutes(v1)
 	}
 }
 

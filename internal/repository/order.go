@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -25,22 +26,90 @@ func (o *OrderRepos) Create(ctx *fiber.Ctx, order domain.Order) (int, error) {
 
 	defer cancel()
 
-	query := fmt.Sprintf(
-		`INSERT INTO
-					%s
-				(pitch_id,user_id,order_date,start_time,end_time,status) 
-					VALUES
-				($1,$2,to_timestamp($3) at time zone 'GMT',$4,$5,$6) RETURNING id`, orderTable)
+	tx := o.db.MustBegin()
 
-	err := o.db.QueryRowx(query, order.PitchId, order.UserId, order.OrderDate, order.StartTime, order.EndTime, order.Status).Scan(&id)
+	t := order.Times[(len(order.Times) - 1)]
+
+	pt := strings.Split(t, ":")
+
+	hh, err := strconv.Atoi(pt[0])
 
 	if err != nil {
-		return 0, fmt.Errorf("repository.Create: %w", err)
+		return 0, fmt.Errorf("repository.Create:err1 %w", err)
+	}
+
+	min, err := strconv.Atoi(pt[1])
+
+	if err != nil {
+		return 0, fmt.Errorf("repository.Create:err1 %w", err)
+	}
+
+	total := hh*3600 + min*60
+
+	query := fmt.Sprintf(
+		`INSERT INTO
+							%s
+						(first_name, phone_number, extra_info, card_id, pitch_id, user_id, order_date, status,end_order_date) 
+							VALUES
+						($1,$2,$3,$4,$5,$6,to_timestamp($7) at time zone 'GMT',$8,to_timestamp($9) at time zone 'GMT') RETURNING id`, orderTable)
+
+	err = tx.QueryRowx(query, order.UserName, order.PhoneNumber, order.ExtraInfo, order.CardId, order.PitchId, order.UserId, order.OrderDate, order.Status, total+int(order.OrderDate)).Scan(&id)
+
+	if err != nil {
+		txErr := tx.Rollback()
+		if txErr != nil {
+			return 0, fmt.Errorf("repository.Create:tx1 %w", txErr)
+		}
+		return 0, fmt.Errorf("repository.Create:err1 %w", err)
+	}
+
+	for _, val := range order.ServiceIds {
+		queryService := fmt.Sprintf(
+			`INSERT INTO
+							%s
+						(service_id,order_id) 
+							VALUES
+						($1,$2)`, orderServiceTable)
+
+		_, err = tx.Exec(queryService, val, id)
+
+		if err != nil {
+			txErr := tx.Rollback()
+			if txErr != nil {
+				return 0, fmt.Errorf("repository.Create:tx2 %w", txErr)
+			}
+			return 0, fmt.Errorf("repository.Create:err2 %w", err)
+		}
+
+	}
+	for _, val := range order.Times {
+		queryService := fmt.Sprintf(
+			`INSERT INTO
+							%s
+						(order_work_time,order_id) 
+							VALUES
+						($1,$2)`, orderTimeTable)
+
+		_, err = tx.Exec(queryService, val, id)
+		if err != nil {
+			txErr := tx.Rollback()
+			if txErr != nil {
+				return 0, fmt.Errorf("repository.Create:tx3 %w", txErr)
+			}
+			return 0, fmt.Errorf("repository.Create:err3 %w", err)
+		}
+
+	}
+
+	txErr := tx.Commit()
+	if txErr != nil {
+		return 0, fmt.Errorf("repository.Create: %w", txErr)
 	}
 	return id, nil
 }
 
-func (o *OrderRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info domain.UserInfo, date float64) (*domain.GetAllResponses, error) {
+func (o *OrderRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info domain.UserInfo, order domain.FilterForOrder) (*domain.GetAllResponses, error) {
+
 	var (
 		setValues      string
 		forCheckValues []string
@@ -61,8 +130,15 @@ func (o *OrderRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info domain.
 		forCheckValues = append(forCheckValues, fmt.Sprintf("o.user_id = %d", info.Id))
 	}
 
-	if date != 0 {
-		forCheckValues = append(forCheckValues, fmt.Sprintf("o.order_date = to_timestamp(%f) at time zone 'GMT'", date))
+	if order.OrderDate != 0 {
+		forCheckValues = append(forCheckValues, fmt.Sprintf("o.order_date = to_timestamp(%f) at time zone 'GMT'", order.OrderDate))
+	}
+
+	switch order.OrderStatus {
+	case 1:
+		forCheckValues = append(forCheckValues, fmt.Sprintf("o.end_order_date < to_timestamp(%d) at time zone 'GMT'", time.Now().Unix()))
+	case 2:
+		forCheckValues = append(forCheckValues, fmt.Sprintf("o.end_order_date >= to_timestamp(%d) at time zone 'GMT'", time.Now().Unix()))
 	}
 
 	whereClause = strings.Join(forCheckValues, " AND ")
@@ -102,16 +178,15 @@ func (o *OrderRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info domain.
 		`select 
 					o.id,
 					extract(epoch from o.order_date::timestamp at time zone 'GMT') "order_date",
-					o.start_time,
-					o.end_time,
 					o.status,
+					o.first_name,
+					o.phone_number,
+					o.card_id,
 					p.price,
 					p.pitch_type,
 					p.pitch_image,
 					b.building_name,
-					b.address,
-					u.user_name,
-					u.phone_number
+					b.address
 				from 
 					%s o 
 				LEFT OUTER JOIN
@@ -122,11 +197,7 @@ func (o *OrderRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info domain.
 					%s b
 				on 
 					b.id = p.building_id
-				LEFT OUTER JOIN
-					%s u
-				on 
-					o.user_id = u.id 
-				%s ORDER BY o.id ASC LIMIT $1 OFFSET $2`, orderTable, pitchTable, buildingTable, userTable, setValues)
+				%s ORDER BY o.id ASC LIMIT $1 OFFSET $2`, orderTable, pitchTable, buildingTable, setValues)
 
 	err = o.db.Select(&inp, query, page.Limit, offset)
 
@@ -142,11 +213,110 @@ func (o *OrderRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info domain.
 
 	for _, value := range inp {
 		value.PitchImage = url + "/" + "media/" + value.PitchImage
+
+		queryTimes := fmt.Sprintf("SELECT id,order_work_time FROM %s WHERE order_id = $1 ", orderTimeTable)
+
+		err = o.db.Select(&value.TimeInput, queryTimes, value.Id)
+
+		if err != nil {
+			return nil, fmt.Errorf("repository.GetAll: %w", err)
+
+		}
+
+		queryServices := fmt.Sprintf(
+			`SELECT
+						price,service_name
+					FROM
+						%s os
+					INNER JOIN
+						%s ser
+					ON 
+						os.service_id = ser.id
+					WHERE
+						order_id = $1 `, orderServiceTable, serviceTable)
+
+		err = o.db.Select(&value.ServiceInput, queryServices, value.Id)
+
+		if err != nil {
+			return nil, fmt.Errorf("repository.GetAll: %w", err)
+
+		}
+
 	}
 
 	ans := domain.GetAllResponses{
 		Data:     inp,
 		PageInfo: pages,
+	}
+	return &ans, nil
+}
+
+func (o *OrderRepos) GetAllBookTime(ctx *fiber.Ctx, times domain.FilterForOrderTimes) (*domain.GetAllResponses, error) {
+	var (
+		forCheckValues []string
+		whereClause    string
+		setValues      string
+		caseValue      string
+	)
+
+	_, cancel := context.WithTimeout(ctx.Context(), 4*time.Second)
+
+	defer cancel()
+
+	if times.OrderDate != 0 {
+		caseValue = fmt.Sprintf(
+			`,CASE
+						WHEN ot.id != 0 THEN true
+						ELSE false
+					END is_booked`)
+
+		forCheckValues = append(forCheckValues, fmt.Sprintf("o.order_date = to_timestamp(%f) at time zone 'GMT'", times.OrderDate))
+
+	}
+	if times.BuildingId != 0 {
+		forCheckValues = append(forCheckValues, fmt.Sprintf("t.building_id = %d", times.BuildingId))
+	}
+
+	whereClause = strings.Join(forCheckValues, " AND ")
+
+	if len(forCheckValues) != 0 {
+		setValues = " WHERE " + whereClause
+	}
+
+	var inp []*domain.OrderTime
+
+	query := fmt.Sprintf(
+		`select
+					t.work_time
+					%s
+					from
+						%s t
+							LEFT JOIN
+							%s b
+								on
+									b.id = t.building_id
+							LEFT JOIN
+							%s p
+								on
+									b.id = p.building_id
+							LEFT JOIN 
+								%s o
+								on
+									p.id = o.pitch_id
+							LEFT JOIN 
+								%s ot 
+							on 
+								(o.id = ot.order_id and t.work_time = ot.order_work_time)
+							%s
+					ORDER BY o.id ;`, caseValue, timeTable, buildingTable, pitchTable, orderTable, orderTimeTable, setValues)
+
+	err := o.db.Select(&inp, query)
+
+	if err != nil {
+		return nil, fmt.Errorf("repository.GetAllBookTime: %w", err)
+	}
+	ans := domain.GetAllResponses{
+		Data: inp,
 	}
 	return &ans, nil
 }

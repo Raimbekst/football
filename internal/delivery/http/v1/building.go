@@ -17,8 +17,8 @@ type Building struct {
 	Description   string                `json:"description" form:"description"`
 	BuildingImage *multipart.FileHeader `json:"building_image" form:"building_image"`
 	WorkTime      int                   `json:"work_time"   form:"work_time" enums:"1,2" examples:"1" `
-	StartTime     string                `json:"start_time"  form:"start_time"`
-	EndTime       string                `json:"end_time"    form:"end_time"`
+	StartTime     int                   `json:"start_time"  form:"start_time"`
+	EndTime       int                   `json:"end_time"    form:"end_time"`
 	Longtitude    string                `json:"longtitude"  form:"longtitude"`
 	Latitude      string                `json:"latitude"    form:"latitude"`
 }
@@ -51,8 +51,8 @@ func (h *Handler) initBuildingRoutes(api fiber.Router) {
 // @Param description formData string false "building description"
 // @Param image formData file true "building image"
 // @Param work_time formData int true "work time type(1 - always,2 -your own choice)" Enums(1 ,2)
-// @Param start_time formData string true "start of work time"
-// @Param end_time   formData string true "end of work time"
+// @Param start_time formData int true "start of work time"
+// @Param end_time   formData int true "end of work time"
 // @Param longtitude formData string true "longtitude"
 // @Param latitude   formData string true "latitude"
 // @Success 201 {object} idResponse

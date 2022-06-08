@@ -18,6 +18,11 @@ const (
 	commentTable       = "comments"
 	gradeTable         = "grades"
 	feedbackTable      = "feedbacks"
+	serviceTable       = "services"
+	cardTable          = "cards"
+	timeTable          = "times"
+	orderServiceTable  = "order_services"
+	orderTimeTable     = "order_times"
 )
 
 type FavouriteInput struct {
@@ -69,7 +74,8 @@ type Favourite interface {
 
 type Order interface {
 	Create(ctx *fiber.Ctx, order domain.Order) (int, error)
-	GetAll(ctx *fiber.Ctx, page domain.Pagination, info domain.UserInfo, date float64) (*domain.GetAllResponses, error)
+	GetAll(ctx *fiber.Ctx, page domain.Pagination, info domain.UserInfo, order domain.FilterForOrder) (*domain.GetAllResponses, error)
+	GetAllBookTime(ctx *fiber.Ctx, times domain.FilterForOrderTimes) (*domain.GetAllResponses, error)
 }
 
 type Comment interface {
@@ -85,6 +91,22 @@ type Feedback interface {
 	GetAll(ctx *fiber.Ctx, page domain.Pagination) (*domain.GetAllResponses, error)
 }
 
+type FootService interface {
+	Create(ctx *fiber.Ctx, service domain.FootService) (int, error)
+	GetAll(ctx *fiber.Ctx, page domain.Pagination) (*domain.GetAllResponses, error)
+	GetById(ctx *fiber.Ctx, userId int) (*domain.FootService, error)
+	Update(ctx *fiber.Ctx, id int, inp domain.FootService) error
+	Delete(ctx *fiber.Ctx, userId int) error
+}
+
+type Card interface {
+	Create(ctx *fiber.Ctx, service domain.Card) (int, error)
+	GetAll(ctx *fiber.Ctx, page domain.Pagination, userId int) (*domain.GetAllResponses, error)
+	GetById(ctx *fiber.Ctx, id, userId int) (*domain.Card, error)
+	Update(ctx *fiber.Ctx, id int, inp domain.Card) error
+	Delete(ctx *fiber.Ctx, id, userId int) error
+}
+
 type Repository struct {
 	UserAuth
 	Building
@@ -93,17 +115,21 @@ type Repository struct {
 	Order
 	Comment
 	Feedback
+	FootService
+	Card
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		UserAuth:  NewUserAuthRepos(db),
-		Building:  NewBuildingRepos(db),
-		Pitch:     NewPitchRepos(db),
-		Favourite: NewFavouriteRepos(db),
-		Order:     NewOrderRepos(db),
-		Comment:   NewCommentRepos(db),
-		Feedback:  NewFeedbackRepos(db),
+		UserAuth:    NewUserAuthRepos(db),
+		Building:    NewBuildingRepos(db),
+		Pitch:       NewPitchRepos(db),
+		Favourite:   NewFavouriteRepos(db),
+		Order:       NewOrderRepos(db),
+		Comment:     NewCommentRepos(db),
+		Feedback:    NewFeedbackRepos(db),
+		FootService: NewFootServiceRepos(db),
+		Card:        NewCardRepos(db),
 	}
 }
 

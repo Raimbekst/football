@@ -2,6 +2,7 @@ package v1
 
 import (
 	"carWash/internal/domain"
+	"carWash/pkg/validation/validationStructs"
 	"github.com/gofiber/fiber/v2"
 	jwtware "github.com/gofiber/jwt/v3"
 )
@@ -10,27 +11,26 @@ func (h *Handler) initOrderRoutes(api fiber.Router) {
 	order := api.Group("/order")
 	{
 		order.Get("/", h.getAllOrders)
+		order.Get("/times", h.getOrderForCreateOrder)
 
 		admin := order.Group("/", jwtware.New(
 			jwtware.Config{
 				SigningKey: []byte(h.signingKey)}), isUser)
 		{
 			admin.Post("/", h.createOrder)
-
 		}
 	}
-
-}
-
-type filterForOrder struct {
-	OrderDate float64 `json:"order_date" form:"order_date" query:"order_date"`
 }
 
 type order struct {
-	PitchId   int     `json:"pitch_id"`
-	OrderDate float64 `json:"order_date"`
-	StartTime string  `json:"start_time"`
-	EndTime   string  `json:"end_time"`
+	PitchId     int      `json:"pitch_id"   validate:"required"`
+	OrderDate   float64  `json:"order_date" validate:"required"`
+	Times       []string `json:"times" validate:"required"`
+	ServiceIds  []int    `json:"service_ids"`
+	CardId      int      `json:"card_id"`
+	FirstName   string   `json:"first_name"`
+	PhoneNumber string   `json:"phone_number" validate:"required"`
+	ExtraInfo   string   `json:"extra_info"`
 }
 
 // @Security User_Auth
@@ -54,15 +54,25 @@ func (h *Handler) createOrder(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(response{Message: err.Error()})
 	}
 
+	ok, mess := validationStructs.ValidateStruct(inp)
+
+	if !ok {
+		return c.Status(fiber.StatusBadRequest).JSON(mess)
+	}
+
 	_, userId := getUser(c)
 
 	input := domain.Order{
-		PitchId:   inp.PitchId,
-		UserId:    userId,
-		OrderDate: inp.OrderDate,
-		StartTime: inp.StartTime,
-		EndTime:   inp.EndTime,
-		Status:    reserved,
+		PitchId:     inp.PitchId,
+		UserId:      userId,
+		OrderDate:   inp.OrderDate,
+		Times:       inp.Times,
+		ServiceIds:  inp.ServiceIds,
+		CardId:      inp.CardId,
+		UserName:    inp.FirstName,
+		PhoneNumber: inp.PhoneNumber,
+		ExtraInfo:   inp.ExtraInfo,
+		Status:      reserved,
 	}
 
 	id, err := h.services.Order.Create(c, input)
@@ -81,7 +91,7 @@ func (h *Handler) createOrder(c *fiber.Ctx) error {
 // @Accept  json
 // @Produce  json
 // @Param array query domain.Pagination  true "A page info"
-// @Param filter query filterForOrder true "filter for orders"
+// @Param filter query domain.FilterForOrder true "filter for orders"
 // @Success 200 {object} domain.GetAllResponses
 // @Failure 400,404 {object} response
 // @Failure 500 {object} response
@@ -90,7 +100,7 @@ func (h *Handler) createOrder(c *fiber.Ctx) error {
 func (h *Handler) getAllOrders(c *fiber.Ctx) error {
 	var (
 		page   domain.Pagination
-		filter filterForOrder
+		filter domain.FilterForOrder
 	)
 
 	if err := c.QueryParser(&page); err != nil {
@@ -114,7 +124,37 @@ func (h *Handler) getAllOrders(c *fiber.Ctx) error {
 		Type: userType,
 	}
 
-	list, err := h.services.Order.GetAll(c, page, info, filter.OrderDate)
+	list, err := h.services.Order.GetAll(c, page, info, filter)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(response{err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(list)
+}
+
+// @Tags orders
+// @Description gets all orders time
+// @ID get-all-order-times
+// @Accept  json
+// @Produce  json
+// @Param array query domain.Pagination  true "A page info"
+// @Param filter query domain.FilterForOrderTimes true "filter for order times"
+// @Success 200 {object} domain.GetAllResponses
+// @Failure 400,404 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /order/times [get]
+func (h *Handler) getOrderForCreateOrder(c *fiber.Ctx) error {
+	var (
+		filter domain.FilterForOrderTimes
+	)
+
+	if err := c.QueryParser(&filter); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(response{Message: err.Error()})
+	}
+
+	list, err := h.services.Order.GetAllBookTime(c, filter)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(response{err.Error()})

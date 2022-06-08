@@ -8,6 +8,8 @@ definitions:
         type: string
       description:
         type: string
+      end-time:
+        type: integer
       end_time:
         type: string
       grade:
@@ -30,15 +32,39 @@ definitions:
         type: string
       price:
         type: integer
+      start-time:
+        type: integer
       start_time:
         type: string
       work_time:
+        type: integer
+    type: object
+  domain.Card:
+    properties:
+      cvv:
+        type: integer
+      full_name:
+        type: string
+      full_number:
+        type: string
+      id:
+        type: integer
+      user_id:
         type: integer
     type: object
   domain.Favourite:
     properties:
       id:
         type: integer
+    type: object
+  domain.FootService:
+    properties:
+      id:
+        type: integer
+      price:
+        type: integer
+      service_name:
+        type: string
     type: object
   domain.GetAllResponses:
     properties:
@@ -139,6 +165,19 @@ definitions:
     - phone_number
     - secret_code
     type: object
+  v1.Card:
+    properties:
+      cvv:
+        type: integer
+      full_name:
+        type: string
+      full_number:
+        type: string
+    required:
+    - cvv
+    - full_name
+    - full_number
+    type: object
   v1.Comment:
     properties:
       building_id:
@@ -158,6 +197,16 @@ definitions:
       text:
         type: string
     type: object
+  v1.FootService:
+    properties:
+      price:
+        type: integer
+      service_name:
+        type: string
+    required:
+    - price
+    - service_name
+    type: object
   v1.Grade:
     properties:
       building_id:
@@ -171,6 +220,26 @@ definitions:
         type: string
     required:
     - phone_number
+    type: object
+  v1.UpdateCard:
+    properties:
+      cvv:
+        type: integer
+      full_name:
+        type: string
+      full_number:
+        type: string
+    required:
+    - cvv
+    - full_name
+    - full_number
+    type: object
+  v1.UpdateFootService:
+    properties:
+      price:
+        type: integer
+      service_name:
+        type: string
     type: object
   v1.UpdateNumberInput:
     properties:
@@ -212,14 +281,31 @@ definitions:
     type: object
   v1.order:
     properties:
-      end_time:
+      card_id:
+        type: integer
+      extra_info:
+        type: string
+      first_name:
         type: string
       order_date:
         type: number
+      phone_number:
+        type: string
       pitch_id:
         type: integer
-      start_time:
-        type: string
+      service_ids:
+        items:
+          type: integer
+        type: array
+      times:
+        items:
+          type: string
+        type: array
+    required:
+    - order_date
+    - phone_number
+    - pitch_id
+    - times
     type: object
   v1.response:
     properties:
@@ -792,12 +878,12 @@ paths:
         in: formData
         name: start_time
         required: true
-        type: string
+        type: integer
       - description: end of work time
         in: formData
         name: end_time
         required: true
-        type: string
+        type: integer
       - description: longtitude
         in: formData
         name: longtitude
@@ -990,6 +1076,202 @@ paths:
       - User_Auth: []
       tags:
       - building
+  /card:
+    get:
+      consumes:
+      - application/json
+      description: get all card
+      operationId: get-all-card
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.GetAllResponses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - card
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: card input
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/v1.Card'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.idResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - card
+  /card/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete card
+      parameters:
+      - description: card id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.okResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - card
+    get:
+      consumes:
+      - application/json
+      description: get card by id
+      operationId: get-card-by-id
+      parameters:
+      - description: card id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Card'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - card
+    put:
+      consumes:
+      - application/json
+      description: update  card
+      parameters:
+      - description: card id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: foot card input
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/v1.UpdateCard'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.okResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - User_Auth: []
+      tags:
+      - card
   /comment:
     get:
       consumes:
@@ -1351,6 +1633,12 @@ paths:
       - in: query
         name: order_date
         type: number
+      - enum:
+        - 1
+        - 2
+        in: query
+        name: order_status
+        type: integer
       produces:
       - application/json
       responses:
@@ -1411,6 +1699,50 @@ paths:
             $ref: '#/definitions/v1.response'
       security:
       - User_Auth: []
+      tags:
+      - orders
+  /order/times:
+    get:
+      consumes:
+      - application/json
+      description: gets all orders time
+      operationId: get-all-order-times
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: building_id
+        type: integer
+      - in: query
+        name: order_date
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.GetAllResponses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
       tags:
       - orders
   /pitch:
@@ -1654,6 +1986,192 @@ paths:
       - User_Auth: []
       tags:
       - pitch
+  /service:
+    get:
+      consumes:
+      - application/json
+      description: get all service
+      operationId: get-all-service
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.GetAllResponses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - service
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: service input
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/v1.FootService'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.idResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - service
+  /service/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete service
+      parameters:
+      - description: service id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.okResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - service
+    get:
+      consumes:
+      - application/json
+      description: get service by id
+      operationId: get-service-by-id
+      parameters:
+      - description: service id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.FootService'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - service
+    put:
+      consumes:
+      - application/json
+      description: update  service
+      parameters:
+      - description: service id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: foot service input
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/v1.UpdateFootService'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.okResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - service
 securityDefinitions:
   User_Auth:
     in: header
