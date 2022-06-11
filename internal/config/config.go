@@ -145,6 +145,7 @@ func setFromEnv(cfg *Config) {
 func parseConfigFile(folder, env string) error {
 	viper.AddConfigPath(folder)
 	viper.SetConfigName("main")
+
 	if err := viper.ReadInConfig(); err != nil {
 		return fmt.Errorf("config.parseConfigFile: %w", err)
 	}
