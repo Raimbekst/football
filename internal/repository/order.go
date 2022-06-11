@@ -298,7 +298,7 @@ func (o *OrderRepos) GetAllBookTime(ctx *fiber.Ctx, times domain.FilterForOrderT
 							LEFT JOIN
 							%s p
 								on
-									b.id = p.building_id
+									(b.id = p.building_id and p.id = %d)
 							LEFT JOIN 
 								%s o
 								on
@@ -308,7 +308,7 @@ func (o *OrderRepos) GetAllBookTime(ctx *fiber.Ctx, times domain.FilterForOrderT
 							on 
 								(o.id = ot.order_id and t.work_time = ot.order_work_time)
 							%s
-					ORDER BY t.id ;`, caseValue, timeTable, buildingTable, pitchTable, orderTable, orderTimeTable, setValues)
+					ORDER BY t.id ;`, caseValue, timeTable, buildingTable, pitchTable, times.PitchId, orderTable, orderTimeTable, setValues)
 
 	err := o.db.Select(&inp, query)
 

@@ -42,6 +42,7 @@ type OrderTime struct {
 type FilterForOrderTimes struct {
 	OrderDate  float64 `json:"order_date" form:"order_date" query:"order_date"`
 	BuildingId int     `json:"building_id" form:"building_id" query:"building_id"`
+	PitchId    int     `json:"pitch_id" form:"pitch_id"   query:"pitch_id"`
 }
 
 type FilterForOrder struct {

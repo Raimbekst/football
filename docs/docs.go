@@ -2185,6 +2185,11 @@ var doc = `{
                         "type": "number",
                         "name": "order_date",
                         "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "pitch_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {

@@ -1720,6 +1720,9 @@ paths:
       - in: query
         name: order_date
         type: number
+      - in: query
+        name: pitch_id
+        type: integer
       produces:
       - application/json
       responses:
