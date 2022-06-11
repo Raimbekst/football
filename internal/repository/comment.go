@@ -20,25 +20,14 @@ func NewCommentRepos(db *sqlx.DB) *CommentRepos {
 func (c *CommentRepos) Create(ctx *fiber.Ctx, comment domain.Comment) (int, error) {
 
 	var id int
-	var inp domain.Comment
-
 	_, cancel := context.WithTimeout(ctx.Context(), 500*time.Millisecond)
 
 	defer cancel()
 
-	queryCheck := fmt.Sprintf(
-		`SELECT * FROM %s WHERE user_id = $1 AND building_id = $2`, commentTable)
-
-	err := c.db.Get(&inp, queryCheck, comment.UserId, comment.BuildingId)
-
-	if err == nil {
-		return 0, fmt.Errorf("repository.Create: %w", domain.ErrUserCommented)
-	}
-
 	query := fmt.Sprintf(
 		`INSERT INTO %s(comment,user_id,building_id) VALUES($1,$2,$3) RETURNING id`, commentTable)
 
-	err = c.db.QueryRowx(query, comment.CommentText, comment.UserId, comment.BuildingId).Scan(&id)
+	err := c.db.QueryRowx(query, comment.CommentText, comment.UserId, comment.BuildingId).Scan(&id)
 
 	if err != nil {
 		return 0, fmt.Errorf("repository.Create: %w", err)
@@ -110,25 +99,15 @@ func (c *CommentRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, buildingId
 
 func (c *CommentRepos) CreateGrade(ctx *fiber.Ctx, grade domain.Grade) (int, error) {
 	var id int
-	var inp domain.Comment
 
 	_, cancel := context.WithTimeout(ctx.Context(), 500*time.Millisecond)
 
 	defer cancel()
 
-	queryCheck := fmt.Sprintf(
-		`SELECT * FROM %s WHERE user_id = $1 AND building_id = $2`, gradeTable)
-
-	err := c.db.Get(&inp, queryCheck, grade.UserId, grade.BuildingId)
-
-	if err == nil {
-		return 0, fmt.Errorf("repository.Create: %w", domain.ErrUserCommented)
-	}
-
 	query := fmt.Sprintf(
 		`INSERT INTO %s(grade,user_id,building_id) VALUES($1,$2,$3) RETURNING id`, gradeTable)
 
-	err = c.db.QueryRowx(query, grade.Grade, grade.UserId, grade.BuildingId).Scan(&id)
+	err := c.db.QueryRowx(query, grade.Grade, grade.UserId, grade.BuildingId).Scan(&id)
 
 	if err != nil {
 		return 0, fmt.Errorf("repository.Create: %w", err)

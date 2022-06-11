@@ -6,6 +6,8 @@ definitions:
         type: string
       building_image:
         type: string
+      count_graded_user:
+        type: integer
       description:
         type: string
       end-time:

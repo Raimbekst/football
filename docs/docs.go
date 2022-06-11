@@ -2889,6 +2889,9 @@ var doc = `{
                 "building_image": {
                     "type": "string"
                 },
+                "count_graded_user": {
+                    "type": "integer"
+                },
                 "description": {
                     "type": "string"
                 },

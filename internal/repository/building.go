@@ -179,7 +179,7 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 					b.id ASC LIMIT $1 OFFSET $2`, userIdCase, buildingTable, pitchTable, favouriteTable, userId, userTable, setValues)
 
 	err := b.db.Select(&inp, query, page.Limit, offset)
-	fmt.Println(query)
+
 	if err != nil {
 		return nil, fmt.Errorf("repository.GetAll: %w", err)
 	}
@@ -195,6 +195,15 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 
 		row := b.db.QueryRow(query, val.Id)
 		err = row.Scan(&val.Grade)
+
+		if err != nil {
+			return nil, fmt.Errorf("repository.GetAll: %w", err)
+		}
+
+		queryGetUserCount := fmt.Sprintf("SELECT coalesce(COUNT(distinct user_id),null,0) FROM %s WHERE building_id = $1", gradeTable)
+
+		rowGetUser := b.db.QueryRow(queryGetUserCount, val.Id)
+		err = rowGetUser.Scan(&val.CountGradedUser)
 
 		if err != nil {
 			return nil, fmt.Errorf("repository.GetAll: %w", err)

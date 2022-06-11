@@ -19,6 +19,7 @@ type Building struct {
 	Latitude        string  `json:"latitude,omitempty"    db:"latitude"`
 	IsFavourite     bool    `json:"is_favourite" db:"is_favourite"`
 	Grade           float64 `json:"grade" db:"grade"`
+	CountGradedUser int     `json:"count_graded_user"`
 	Favourite       `json:"favourite,omitempty" db:"f"`
 }
 
