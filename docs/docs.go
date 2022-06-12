@@ -1959,7 +1959,64 @@ var doc = `{
                 }
             }
         },
-        "/grade": {
+        "/notification": {
+            "get": {
+                "description": "gets all notifications",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notification"
+                ],
+                "operationId": "get-all-notification",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.GetAllResponses"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -1973,16 +2030,16 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "comment"
+                    "notification"
                 ],
                 "parameters": [
                     {
-                        "description": "grade info",
+                        "description": "notification input",
                         "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.Grade"
+                            "$ref": "#/definitions/v1.Notification"
                         }
                     }
                 ],
@@ -3152,12 +3209,20 @@ var doc = `{
         },
         "v1.Comment": {
             "type": "object",
+            "required": [
+                "building_id",
+                "comment",
+                "grade"
+            ],
             "properties": {
                 "building_id": {
                     "type": "integer"
                 },
                 "comment": {
                     "type": "string"
+                },
+                "grade": {
+                    "type": "number"
                 }
             }
         },
@@ -3195,14 +3260,14 @@ var doc = `{
                 }
             }
         },
-        "v1.Grade": {
+        "v1.Notification": {
             "type": "object",
             "properties": {
-                "building_id": {
-                    "type": "integer"
+                "content": {
+                    "type": "string"
                 },
-                "grade": {
-                    "type": "number"
+                "title": {
+                    "type": "string"
                 }
             }
         },

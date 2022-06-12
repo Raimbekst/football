@@ -10,6 +10,14 @@ type FeedbackService struct {
 	repos repository.Feedback
 }
 
+func (f *FeedbackService) CreateNoty(ctx *fiber.Ctx, feedback domain.Notification) (int, error) {
+	return f.repos.CreateNoty(ctx, feedback)
+}
+
+func (f *FeedbackService) GetAllNoty(ctx *fiber.Ctx, page domain.Pagination) (*domain.GetAllResponses, error) {
+	return f.repos.GetAllNoty(ctx, page)
+}
+
 func NewFeedbackService(repos repository.Feedback) *FeedbackService {
 	return &FeedbackService{repos: repos}
 }

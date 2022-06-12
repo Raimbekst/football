@@ -2,18 +2,15 @@ package v1
 
 import (
 	"carWash/internal/domain"
+	"carWash/pkg/validation/validationStructs"
 	"github.com/gofiber/fiber/v2"
 	jwtware "github.com/gofiber/jwt/v3"
 )
 
 type Comment struct {
-	CommentText string `json:"comment"`
-	BuildingId  int    `json:"building_id"`
-}
-
-type Grade struct {
-	Grade      float64 `json:"grade"`
-	BuildingId int     `json:"building_id"`
+	CommentText string  `json:"comment" validate:"required"`
+	BuildingId  int     `json:"building_id" validate:"required"`
+	Grade       float64 `json:"grade" validate:"required"`
 }
 
 func (h *Handler) initCommentRoutes(api fiber.Router) {
@@ -27,20 +24,6 @@ func (h *Handler) initCommentRoutes(api fiber.Router) {
 			}), isUser)
 		{
 			admin.Post("", h.createComment)
-		}
-	}
-}
-
-func (h *Handler) initGradeRoutes(api fiber.Router) {
-
-	partner := api.Group("/grade")
-	{
-		admin := partner.Group("", jwtware.New(
-			jwtware.Config{
-				SigningKey: []byte(h.signingKey),
-			}), isUser)
-		{
-			admin.Post("", h.createGrade)
 		}
 	}
 }
@@ -65,47 +48,20 @@ func (h *Handler) createComment(c *fiber.Ctx) error {
 
 	_, userId := getUser(c)
 
+	ok, errs := validationStructs.ValidateStruct(input)
+
+	if !ok {
+		return c.Status(fiber.StatusBadRequest).JSON(errs)
+	}
+
 	inp := domain.Comment{
 		CommentText: input.CommentText,
 		UserId:      userId,
 		BuildingId:  input.BuildingId,
+		Grade:       input.Grade,
 	}
 
 	id, err := h.services.Comment.Create(c, inp)
-
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(response{Message: err.Error()})
-	}
-	return c.Status(fiber.StatusCreated).JSON(idResponse{ID: id})
-}
-
-// @Security User_Auth
-// @Tags comment
-// @ModuleID createGrade
-// @Accept json
-// @Produce json
-// @Param data body Grade true "grade info"
-// @Success 201 {object} idResponse
-// @Failure 400,404 {object} response
-// @Failure 500 {object} response
-// @Failure default {object} response
-// @Router /grade [post]
-func (h *Handler) createGrade(c *fiber.Ctx) error {
-	var input Grade
-
-	if err := c.BodyParser(&input); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(response{Message: err.Error()})
-	}
-
-	_, userId := getUser(c)
-
-	inp := domain.Grade{
-		UserId:     userId,
-		BuildingId: input.BuildingId,
-		Grade:      input.Grade,
-	}
-
-	id, err := h.services.Comment.CreateGrade(c, inp)
 
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(response{Message: err.Error()})

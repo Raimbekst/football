@@ -93,6 +93,28 @@ func (f *FavouriteRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, userId i
 	for _, val := range inp {
 		val.BuildingImage = url + "/" + "media/" + val.BuildingImage
 		val.IsFavourite = true
+
+		query := fmt.Sprintf(
+			`SELECT
+					coalesce(AVG(grade),null,0) 
+				FROM 
+					%s WHERE building_id = $1`, commentTable)
+
+		row := f.db.QueryRow(query, val.Id)
+		err = row.Scan(&val.Grade)
+
+		if err != nil {
+			return nil, fmt.Errorf("repository.GetAll: %w", err)
+		}
+
+		queryGetUserCount := fmt.Sprintf("SELECT coalesce(COUNT(distinct user_id),null,0) FROM %s WHERE building_id = $1", commentTable)
+
+		rowGetUser := f.db.QueryRow(queryGetUserCount, val.Id)
+		err = rowGetUser.Scan(&val.CountGradedUser)
+
+		if err != nil {
+			return nil, fmt.Errorf("repository.GetAll: %w", err)
+		}
 	}
 
 	pages := domain.PaginationPage{

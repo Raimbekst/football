@@ -191,7 +191,7 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 			`SELECT
 					coalesce(AVG(grade),null,0) 
 				FROM 
-					%s WHERE building_id = $1`, gradeTable)
+					%s WHERE building_id = $1`, commentTable)
 
 		row := b.db.QueryRow(query, val.Id)
 		err = row.Scan(&val.Grade)
@@ -200,7 +200,7 @@ func (b *BuildingRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info doma
 			return nil, fmt.Errorf("repository.GetAll: %w", err)
 		}
 
-		queryGetUserCount := fmt.Sprintf("SELECT coalesce(COUNT(distinct user_id),null,0) FROM %s WHERE building_id = $1", gradeTable)
+		queryGetUserCount := fmt.Sprintf("SELECT coalesce(COUNT(distinct user_id),null,0) FROM %s WHERE building_id = $1", commentTable)
 
 		rowGetUser := b.db.QueryRow(queryGetUserCount, val.Id)
 		err = rowGetUser.Scan(&val.CountGradedUser)

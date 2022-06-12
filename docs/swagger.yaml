@@ -186,6 +186,12 @@ definitions:
         type: integer
       comment:
         type: string
+      grade:
+        type: number
+    required:
+    - building_id
+    - comment
+    - grade
     type: object
   v1.Favourite:
     properties:
@@ -209,12 +215,12 @@ definitions:
     - price
     - service_name
     type: object
-  v1.Grade:
+  v1.Notification:
     properties:
-      building_id:
-        type: integer
-      grade:
-        type: number
+      content:
+        type: string
+      title:
+        type: string
     type: object
   v1.PhoneNumberInput:
     properties:
@@ -1581,17 +1587,54 @@ paths:
       - User_Auth: []
       tags:
       - feedback
-  /grade:
+  /notification:
+    get:
+      consumes:
+      - application/json
+      description: gets all notifications
+      operationId: get-all-notification
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.GetAllResponses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.response'
+      tags:
+      - notification
     post:
       consumes:
       - application/json
       parameters:
-      - description: grade info
+      - description: notification input
         in: body
         name: data
         required: true
         schema:
-          $ref: '#/definitions/v1.Grade'
+          $ref: '#/definitions/v1.Notification'
       produces:
       - application/json
       responses:
@@ -1618,7 +1661,7 @@ paths:
       security:
       - User_Auth: []
       tags:
-      - comment
+      - notification
   /order:
     get:
       consumes:

@@ -23,6 +23,7 @@ const (
 	timeTable          = "times"
 	orderServiceTable  = "order_services"
 	orderTimeTable     = "order_times"
+	notificationTable  = "notifications"
 )
 
 type FavouriteInput struct {
@@ -81,14 +82,14 @@ type Order interface {
 type Comment interface {
 	Create(ctx *fiber.Ctx, comment domain.Comment) (int, error)
 	GetAll(ctx *fiber.Ctx, page domain.Pagination, buildingId int) (*domain.GetAllResponses, error)
-
-	CreateGrade(ctx *fiber.Ctx, grade domain.Grade) (int, error)
-	GetAllGrades(ctx *fiber.Ctx, page domain.Pagination, buildingId int) (*domain.GetAllResponses, error)
 }
 
 type Feedback interface {
 	Create(ctx *fiber.Ctx, feedback domain.Feedback, id int) (int, error)
 	GetAll(ctx *fiber.Ctx, page domain.Pagination) (*domain.GetAllResponses, error)
+
+	CreateNoty(ctx *fiber.Ctx, noty domain.Notification) (int, error)
+	GetAllNoty(ctx *fiber.Ctx, page domain.Pagination) (*domain.GetAllResponses, error)
 }
 
 type FootService interface {
