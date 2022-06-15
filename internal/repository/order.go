@@ -321,3 +321,20 @@ func (o *OrderRepos) GetAllBookTime(ctx *fiber.Ctx, times domain.FilterForOrderT
 	}
 	return &ans, nil
 }
+
+func (o *OrderRepos) Delete(ctx *fiber.Ctx, id int) error {
+
+	_, cancel := context.WithTimeout(ctx.Context(), 500*time.Millisecond)
+
+	defer cancel()
+
+	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1", orderTable)
+
+	_, err := o.db.Exec(query, id)
+
+	if err != nil {
+		return fmt.Errorf("repository.Delete: %w", domain.ErrNotFound)
+	}
+
+	return nil
+}

@@ -25,3 +25,7 @@ func (o *OrderService) Create(ctx *fiber.Ctx, order domain.Order) (int, error) {
 func (o *OrderService) GetAll(ctx *fiber.Ctx, page domain.Pagination, info domain.UserInfo, order domain.FilterForOrder) (*domain.GetAllResponses, error) {
 	return o.repos.GetAll(ctx, page, info, order)
 }
+
+func (o *OrderService) Delete(ctx *fiber.Ctx, id int) error {
+	return o.repos.Delete(ctx,id)
+}

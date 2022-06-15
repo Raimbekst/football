@@ -3,8 +3,10 @@ package v1
 import (
 	"carWash/internal/domain"
 	"carWash/pkg/validation/validationStructs"
+	"errors"
 	"github.com/gofiber/fiber/v2"
 	jwtware "github.com/gofiber/jwt/v3"
+	"strconv"
 )
 
 func (h *Handler) initOrderRoutes(api fiber.Router) {
@@ -18,6 +20,7 @@ func (h *Handler) initOrderRoutes(api fiber.Router) {
 				SigningKey: []byte(h.signingKey)}), isUser)
 		{
 			admin.Post("/", h.createOrder)
+			admin.Delete("/:id", h.deleteOrder)
 		}
 	}
 }
@@ -161,4 +164,33 @@ func (h *Handler) getOrderForCreateOrder(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(list)
+}
+
+// @Security User_Auth
+// @Tags orders
+// @Description delete order
+// @ModuleID deleteOrder
+// @Accept  json
+// @Produce  json
+// @Param id path string true "order id"
+// @Success 200 {object} okResponse
+// @Failure 400,404 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /order/{id} [delete]
+func (h *Handler) deleteOrder(c *fiber.Ctx) error {
+	id, err := strconv.Atoi(c.Params("id"))
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(response{Message: err.Error()})
+	}
+
+	if err := h.services.Order.Delete(c, id); err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			return c.Status(fiber.StatusBadRequest).JSON(response{Message: err.Error()})
+		}
+
+		return c.Status(fiber.StatusInternalServerError).JSON(response{Message: err.Error()})
+	}
+	return c.Status(fiber.StatusOK).JSON(okResponse{Message: "OK"})
 }

@@ -77,6 +77,7 @@ type Order interface {
 	Create(ctx *fiber.Ctx, order domain.Order) (int, error)
 	GetAll(ctx *fiber.Ctx, page domain.Pagination, info domain.UserInfo, order domain.FilterForOrder) (*domain.GetAllResponses, error)
 	GetAllBookTime(ctx *fiber.Ctx, times domain.FilterForOrderTimes) (*domain.GetAllResponses, error)
+	Delete(ctx *fiber.Ctx, id int) error
 }
 
 type Comment interface {
