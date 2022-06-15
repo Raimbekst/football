@@ -7,6 +7,7 @@ type Order struct {
 	Price        int            `json:"price" db:"price"`
 	PitchImage   string         `json:"pitch_image" db:"pitch_image"`
 	PitchType    int            `json:"pitch_type" db:"pitch_type"`
+	PitchExtra   int            `json:"pitch_extra" db:"pitch_extra"`
 	UserName     string         `json:"user_name" db:"first_name"`
 	PhoneNumber  string         `json:"phone_number" db:"phone_number"`
 	BuildingName string         `json:"building_name" db:"building_name"`

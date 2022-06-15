@@ -184,6 +184,7 @@ func (o *OrderRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, info domain.
 					o.card_id,
 					p.price,
 					p.pitch_type,
+					p.pitch_extra,
 					p.pitch_image,
 					b.building_name,
 					b.address
