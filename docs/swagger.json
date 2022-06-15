@@ -2,7 +2,7 @@
     "swagger": "2.0",
     "info": {
         "description": "API Server for CarWash Application",
-        "title": "Car Wash Bismillahirrahmanirrahim",
+        "title": "Football Service",
         "contact": {},
         "version": "2.0"
     },

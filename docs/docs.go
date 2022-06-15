@@ -3469,7 +3469,7 @@ var SwaggerInfo = swaggerInfo{
 	Host:        "localhost:8080",
 	BasePath:    "/api/v1/",
 	Schemes:     []string{},
-	Title:       "Car Wash Bismillahirrahmanirrahim",
+	Title:       "Football Service",
 	Description: "API Server for CarWash Application",
 }
 

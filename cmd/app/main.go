@@ -6,7 +6,7 @@ const (
 	configPath = "configs"
 )
 
-// @title Car Wash Bismillahirrahmanirrahim
+// @title Football Service
 // @version 2.0
 // @description API Server for CarWash Application
 
