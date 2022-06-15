@@ -76,7 +76,7 @@ func (p *PitchRepos) GetAll(ctx *fiber.Ctx, page domain.Pagination, id int) (*do
 
 	inp := make([]*domain.Pitch, 0, page.Limit)
 
-	query := fmt.Sprintf("SELECT * FROM %s ORDER BY id ASC LIMIT $1 OFFSET $2", pitchTable)
+	query := fmt.Sprintf("SELECT * FROM %s %s ORDER BY id ASC LIMIT $1 OFFSET $2", pitchTable, setValues)
 
 	err = p.db.Select(&inp, query, page.Limit, offset)
 
