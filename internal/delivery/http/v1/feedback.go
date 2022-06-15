@@ -143,7 +143,7 @@ func (h *Handler) createNotification(c *fiber.Ctx) error {
 // @Description gets all notifications
 // @ID get-all-notification
 // @Accept  json
-// @Produce  json
+// @Produce json
 // @Param array query domain.Pagination  true "A page info"
 // @Success 200 {object} domain.GetAllResponses
 // @Failure 400,404 {object} response

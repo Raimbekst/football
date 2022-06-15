@@ -270,7 +270,7 @@ func (o *OrderRepos) GetAllBookTime(ctx *fiber.Ctx, times domain.FilterForOrderT
 						ELSE false
 					END is_booked`)
 
-		forCheckValues = append(forCheckValues, fmt.Sprintf("o.order_date = to_timestamp(%f) at time zone 'GMT'", times.OrderDate))
+		//forCheckValues = append(forCheckValues, fmt.Sprintf("o.order_date = to_timestamp(%f) at time zone 'GMT'", times.OrderDate))
 
 	}
 	if times.BuildingId != 0 {
@@ -302,13 +302,13 @@ func (o *OrderRepos) GetAllBookTime(ctx *fiber.Ctx, times domain.FilterForOrderT
 							LEFT JOIN 
 								%s o
 								on
-									p.id = o.pitch_id
+									(p.id = o.pitch_id and o.order_date = to_timestamp(%f) at time zone 'GMT')
 							LEFT JOIN 
 								%s ot 
 							on 
-								(o.id = ot.order_id and t.work_time = ot.order_work_time)
+								(o.id = ot.order_id and t.work_time = ot.order_work_time )
 							%s
-					ORDER BY t.id ;`, caseValue, timeTable, buildingTable, pitchTable, times.PitchId, orderTable, orderTimeTable, setValues)
+					ORDER BY t.id ;`, caseValue, timeTable, buildingTable, pitchTable, times.PitchId, orderTable, times.OrderDate, orderTimeTable, setValues)
 
 	err := o.db.Select(&inp, query)
 
